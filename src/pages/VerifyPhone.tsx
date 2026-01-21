@@ -215,18 +215,10 @@ export default function VerifyPhone() {
           )}
         </div>
 
-        {/* Debug info for development */}
-        {import.meta.env.DEV && (
-          <div className="mt-8 p-4 bg-muted rounded-lg text-xs text-muted-foreground">
-            <p className="font-medium mb-1">Debug Info (dev only):</p>
-            <p>Phone: {phone || "not set"}</p>
-            <p>Pending: {pendingPhone || "none"}</p>
-            <p className="mt-2 text-yellow-600">
-              Note: Phone auth requires Supabase phone provider setup. For testing,
-              use the Supabase dashboard to manually verify users.
-            </p>
-          </div>
-        )}
+        {/* Info for users */}
+        <div className="mt-8 p-4 bg-muted rounded-lg text-xs text-muted-foreground text-center">
+          <p>Didn't receive the code? Check your SMS inbox or try resending.</p>
+        </div>
       </div>
     </div>
   );
