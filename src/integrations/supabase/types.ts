@@ -14,6 +14,98 @@ export type Database = {
   }
   public: {
     Tables: {
+      lost_item_images: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          lost_item_id: string
+          storage_path: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          lost_item_id: string
+          storage_path: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          lost_item_id?: string
+          storage_path?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lost_item_images_lost_item_id_fkey"
+            columns: ["lost_item_id"]
+            isOneToOne: false
+            referencedRelation: "lost_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lost_items: {
+        Row: {
+          auto_number: string | null
+          category: Database["public"]["Enums"]["item_category"]
+          created_at: string
+          description: string | null
+          driver_description: string | null
+          id: string
+          is_draft: boolean
+          lost_date: string
+          lost_location_address: string | null
+          lost_location_lat: number | null
+          lost_location_lng: number | null
+          matched_driver_id: string | null
+          route_description: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          auto_number?: string | null
+          category: Database["public"]["Enums"]["item_category"]
+          created_at?: string
+          description?: string | null
+          driver_description?: string | null
+          id?: string
+          is_draft?: boolean
+          lost_date: string
+          lost_location_address?: string | null
+          lost_location_lat?: number | null
+          lost_location_lng?: number | null
+          matched_driver_id?: string | null
+          route_description?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          title: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          auto_number?: string | null
+          category?: Database["public"]["Enums"]["item_category"]
+          created_at?: string
+          description?: string | null
+          driver_description?: string | null
+          id?: string
+          is_draft?: boolean
+          lost_date?: string
+          lost_location_address?: string | null
+          lost_location_lat?: number | null
+          lost_location_lng?: number | null
+          matched_driver_id?: string | null
+          route_description?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -90,6 +182,16 @@ export type Database = {
     }
     Enums: {
       app_role: "user" | "driver" | "admin"
+      item_category:
+        | "electronics"
+        | "documents"
+        | "wallet"
+        | "bag"
+        | "jewelry"
+        | "clothing"
+        | "keys"
+        | "other"
+      report_status: "active" | "matched" | "resolved" | "expired" | "cancelled"
       user_type: "passenger" | "driver"
     }
     CompositeTypes: {
@@ -219,6 +321,17 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["user", "driver", "admin"],
+      item_category: [
+        "electronics",
+        "documents",
+        "wallet",
+        "bag",
+        "jewelry",
+        "clothing",
+        "keys",
+        "other",
+      ],
+      report_status: ["active", "matched", "resolved", "expired", "cancelled"],
       user_type: ["passenger", "driver"],
     },
   },
