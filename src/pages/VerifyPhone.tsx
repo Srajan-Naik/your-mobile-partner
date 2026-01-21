@@ -1,122 +1,126 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { toast } from "sonner";
+import { formatPhoneDisplay } from "@/lib/validations/auth";
 
 const OTP_LENGTH = 6;
+const RESEND_COOLDOWN = 30;
 
 export default function VerifyPhone() {
   const navigate = useNavigate();
-  const { verifyPhone, user, isLoading } = useAuth();
-  
-  const [otp, setOtp] = useState<string[]>(Array(OTP_LENGTH).fill(""));
-  const [error, setError] = useState("");
-  const [resendTimer, setResendTimer] = useState(30);
+  const { verifyOtp, resendOtp, pendingPhone, user, isLoading, profile } = useAuth();
+
+  const [otp, setOtp] = useState("");
+  const [resendTimer, setResendTimer] = useState(RESEND_COOLDOWN);
   const [isVerifying, setIsVerifying] = useState(false);
-  
-  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [isResending, setIsResending] = useState(false);
 
-  useEffect(() => {
-    // Focus first input on mount
-    inputRefs.current[0]?.focus();
-  }, []);
+  const phone = pendingPhone || user?.phone || "";
 
+  // Redirect if already verified
   useEffect(() => {
-    // Countdown timer for resend
+    if (user?.isVerified) {
+      const redirectPath =
+        profile?.user_type === "driver"
+          ? "/driver/verification"
+          : "/passenger/dashboard";
+      navigate(redirectPath, { replace: true });
+    }
+  }, [user?.isVerified, profile?.user_type, navigate]);
+
+  // Countdown timer for resend
+  useEffect(() => {
     if (resendTimer > 0) {
-      const timer = setTimeout(() => setResendTimer(resendTimer - 1), 1000);
+      const timer = setTimeout(() => setResendTimer((t) => t - 1), 1000);
       return () => clearTimeout(timer);
     }
   }, [resendTimer]);
 
-  const handleChange = (index: number, value: string) => {
-    if (!/^\d*$/.test(value)) return;
-
-    const newOtp = [...otp];
-    newOtp[index] = value.slice(-1);
-    setOtp(newOtp);
-
-    // Auto-focus next input
-    if (value && index < OTP_LENGTH - 1) {
-      inputRefs.current[index + 1]?.focus();
-    }
+  // Handle OTP change
+  const handleOtpChange = (value: string) => {
+    setOtp(value);
 
     // Auto-submit when complete
-    if (index === OTP_LENGTH - 1 && value) {
-      const fullOtp = newOtp.join("");
-      if (fullOtp.length === OTP_LENGTH) {
-        handleVerify(fullOtp);
-      }
+    if (value.length === OTP_LENGTH) {
+      handleVerify(value);
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
-    const newOtp = [...otp];
-    
-    pasted.split("").forEach((char, i) => {
-      if (i < OTP_LENGTH) {
-        newOtp[i] = char;
-      }
-    });
-    
-    setOtp(newOtp);
-    
-    if (pasted.length === OTP_LENGTH) {
-      handleVerify(pasted);
-    } else {
-      inputRefs.current[pasted.length]?.focus();
-    }
-  };
-
+  // Verify OTP
   const handleVerify = async (code: string) => {
-    setError("");
+    if (code.length !== OTP_LENGTH) {
+      toast.error("Please enter the complete verification code");
+      return;
+    }
+
+    if (!phone) {
+      toast.error("Phone number not found. Please try signing up again.");
+      navigate("/signup");
+      return;
+    }
+
     setIsVerifying(true);
-    
+
     try {
-      const success = await verifyPhone(code);
+      const { error, success } = await verifyOtp(phone, code);
+
       if (success) {
-        const redirectPath = user?.userType === "driver" 
-          ? "/driver/verification" 
-          : "/passenger/dashboard";
-        navigate(redirectPath);
+        toast.success("Phone verified successfully!");
+        const redirectPath =
+          profile?.user_type === "driver"
+            ? "/driver/verification"
+            : "/passenger/dashboard";
+        navigate(redirectPath, { replace: true });
       } else {
-        setError("Invalid verification code. Please try again.");
-        setOtp(Array(OTP_LENGTH).fill(""));
-        inputRefs.current[0]?.focus();
+        toast.error(error || "Invalid verification code. Please try again.");
+        setOtp("");
       }
     } catch (err) {
-      setError("Verification failed. Please try again.");
+      toast.error("Verification failed. Please try again.");
+      setOtp("");
     } finally {
       setIsVerifying(false);
     }
   };
 
-  const handleResend = () => {
-    // TODO: Implement resend OTP
-    setResendTimer(30);
-    setError("");
-    setOtp(Array(OTP_LENGTH).fill(""));
-    inputRefs.current[0]?.focus();
+  // Resend OTP
+  const handleResend = async () => {
+    if (!phone) {
+      toast.error("Phone number not found.");
+      return;
+    }
+
+    setIsResending(true);
+
+    try {
+      const { error } = await resendOtp(phone);
+
+      if (error) {
+        toast.error(error);
+      } else {
+        toast.success("Verification code sent!");
+        setResendTimer(RESEND_COOLDOWN);
+        setOtp("");
+      }
+    } catch (err) {
+      toast.error("Failed to resend code. Please try again.");
+    } finally {
+      setIsResending(false);
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const code = otp.join("");
-    if (code.length === OTP_LENGTH) {
-      handleVerify(code);
-    } else {
-      setError("Please enter the complete verification code");
-    }
+    handleVerify(otp);
   };
 
   return (
@@ -151,41 +155,42 @@ export default function VerifyPhone() {
               <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
             </svg>
           </div>
-          <h2 className="font-heading text-xl font-semibold mb-2">Enter verification code</h2>
+          <h2 className="font-heading text-xl font-semibold mb-2">
+            Enter verification code
+          </h2>
           <p className="text-sm text-muted-foreground">
             We've sent a 6-digit code to{" "}
-            <span className="font-medium text-foreground">{user?.phone || "your phone"}</span>
+            <span className="font-medium text-foreground">
+              {phone ? formatPhoneDisplay(phone) : "your phone"}
+            </span>
           </p>
         </div>
 
         <form onSubmit={handleSubmit}>
           {/* OTP Input */}
-          <div className="flex justify-center gap-2 mb-6" onPaste={handlePaste}>
-            {otp.map((digit, index) => (
-              <input
-                key={index}
-                ref={(el) => (inputRefs.current[index] = el)}
-                type="text"
-                inputMode="numeric"
-                pattern="\d*"
-                maxLength={1}
-                value={digit}
-                onChange={(e) => handleChange(index, e.target.value)}
-                onKeyDown={(e) => handleKeyDown(index, e)}
-                className="h-14 w-11 rounded-lg border-2 border-input bg-background text-center text-xl font-semibold transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                disabled={isVerifying || isLoading}
-              />
-            ))}
+          <div className="flex justify-center mb-6">
+            <InputOTP
+              value={otp}
+              onChange={handleOtpChange}
+              maxLength={OTP_LENGTH}
+              disabled={isVerifying || isLoading}
+            >
+              <InputOTPGroup>
+                {Array.from({ length: OTP_LENGTH }).map((_, index) => (
+                  <InputOTPSlot
+                    key={index}
+                    index={index}
+                    className="h-14 w-11 text-xl font-semibold"
+                  />
+                ))}
+              </InputOTPGroup>
+            </InputOTP>
           </div>
-
-          {error && (
-            <p className="text-sm text-destructive text-center mb-4">{error}</p>
-          )}
 
           <Button
             type="submit"
             className="w-full h-12 text-base font-medium"
-            disabled={isVerifying || isLoading || otp.join("").length !== OTP_LENGTH}
+            disabled={isVerifying || isLoading || otp.length !== OTP_LENGTH}
           >
             {isVerifying ? <LoadingSpinner size="sm" /> : "Verify"}
           </Button>
@@ -195,18 +200,33 @@ export default function VerifyPhone() {
         <div className="mt-6 text-center">
           {resendTimer > 0 ? (
             <p className="text-sm text-muted-foreground">
-              Resend code in <span className="font-medium text-foreground">{resendTimer}s</span>
+              Resend code in{" "}
+              <span className="font-medium text-foreground">{resendTimer}s</span>
             </p>
           ) : (
             <button
               type="button"
               onClick={handleResend}
-              className="text-sm font-medium text-primary hover:underline"
+              disabled={isResending}
+              className="text-sm font-medium text-primary hover:underline disabled:opacity-50"
             >
-              Resend verification code
+              {isResending ? "Sending..." : "Resend verification code"}
             </button>
           )}
         </div>
+
+        {/* Debug info for development */}
+        {import.meta.env.DEV && (
+          <div className="mt-8 p-4 bg-muted rounded-lg text-xs text-muted-foreground">
+            <p className="font-medium mb-1">Debug Info (dev only):</p>
+            <p>Phone: {phone || "not set"}</p>
+            <p>Pending: {pendingPhone || "none"}</p>
+            <p className="mt-2 text-yellow-600">
+              Note: Phone auth requires Supabase phone provider setup. For testing,
+              use the Supabase dashboard to manually verify users.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

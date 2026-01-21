@@ -1,70 +1,64 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Eye, EyeOff, Phone, Check } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { FormField } from "@/components/ui/form-field";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { cn } from "@/lib/utils";
+import {
+  signupSchema,
+  type SignupFormData,
+  calculatePasswordStrength,
+  normalizePhone,
+} from "@/lib/validations/auth";
+import { toast } from "sonner";
 
 type UserType = "passenger" | "driver";
 
 export default function Signup() {
   const navigate = useNavigate();
-  const { signup, isLoading } = useAuth();
-  
-  const [userType, setUserType] = useState<UserType>("passenger");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const { signUp, isLoading } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
-  const [error, setError] = useState("");
 
-  const passwordStrength = () => {
-    if (password.length === 0) return { strength: 0, label: "" };
-    if (password.length < 6) return { strength: 1, label: "Weak" };
-    if (password.length < 10) return { strength: 2, label: "Medium" };
-    if (password.length >= 10 && /[A-Z]/.test(password) && /[0-9]/.test(password)) {
-      return { strength: 3, label: "Strong" };
-    }
-    return { strength: 2, label: "Medium" };
-  };
+  const form = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      phone: "",
+      password: "",
+      confirmPassword: "",
+      userType: "passenger",
+      termsAccepted: false as any, // Will be validated as literal true
+    },
+  });
 
-  const { strength, label } = passwordStrength();
+  const password = form.watch("password");
+  const confirmPassword = form.watch("confirmPassword");
+  const userType = form.watch("userType");
+  const { score, label, color } = calculatePasswordStrength(password);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
+  const onSubmit = async (data: SignupFormData) => {
+    const normalizedPhone = normalizePhone(data.phone);
+    const { error } = await signUp(normalizedPhone, data.password, data.userType);
 
-    if (!phone || !password || !confirmPassword) {
-      setError("Please fill in all fields");
+    if (error) {
+      toast.error(error);
       return;
     }
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
-
-    if (password.length < 6) {
-      setError("Password must be at least 6 characters");
-      return;
-    }
-
-    if (!termsAccepted) {
-      setError("Please accept the terms and conditions");
-      return;
-    }
-
-    try {
-      await signup(phone, password, userType);
-      navigate("/verify-phone");
-    } catch (err) {
-      setError("Failed to create account. Please try again.");
-    }
+    toast.success("Account created! Please verify your phone number.");
+    navigate("/verify-phone");
   };
 
   return (
@@ -97,7 +91,7 @@ export default function Signup() {
             <button
               key={type}
               type="button"
-              onClick={() => setUserType(type)}
+              onClick={() => form.setValue("userType", type)}
               className={cn(
                 "flex-1 rounded-md py-2.5 text-sm font-medium transition-all",
                 userType === type
@@ -112,113 +106,151 @@ export default function Signup() {
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="flex-1 px-6 space-y-4">
-        <FormField label="Phone Number" required>
-          <div className="relative">
-            <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              type="tel"
-              placeholder="+91 98765 43210"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </FormField>
-
-        <FormField label="Password" required>
-          <div className="relative">
-            <Input
-              type={showPassword ? "text" : "password"}
-              placeholder="Create a password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="pr-10"
-            />
-            <button
-              type="button"
-              onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
-          </div>
-          {password && (
-            <div className="mt-2 space-y-1">
-              <div className="flex gap-1">
-                {[1, 2, 3].map((level) => (
-                  <div
-                    key={level}
-                    className={cn(
-                      "h-1 flex-1 rounded-full transition-colors",
-                      level <= strength
-                        ? strength === 1
-                          ? "bg-destructive"
-                          : strength === 2
-                          ? "bg-yellow-500"
-                          : "bg-success"
-                        : "bg-muted"
-                    )}
-                  />
-                ))}
-              </div>
-              <p className={cn(
-                "text-xs",
-                strength === 1 && "text-destructive",
-                strength === 2 && "text-yellow-600",
-                strength === 3 && "text-success"
-              )}>
-                {label}
-              </p>
-            </div>
-          )}
-        </FormField>
-
-        <FormField label="Confirm Password" required>
-          <div className="relative">
-            <Input
-              type={showPassword ? "text" : "password"}
-              placeholder="Confirm your password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              className="pr-10"
-            />
-            {confirmPassword && password === confirmPassword && (
-              <Check className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-success" />
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 px-6 space-y-4">
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Phone Number *</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      type="tel"
+                      placeholder="+91 98765 43210"
+                      className="pl-10"
+                      {...field}
+                    />
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
             )}
-          </div>
-        </FormField>
-
-        <div className="flex items-start gap-3 pt-2">
-          <Checkbox
-            id="terms"
-            checked={termsAccepted}
-            onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
           />
-          <label htmlFor="terms" className="text-sm leading-tight text-muted-foreground">
-            I agree to the{" "}
-            <Link to="/terms" className="text-primary hover:underline">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link to="/privacy" className="text-primary hover:underline">
-              Privacy Policy
-            </Link>
-          </label>
-        </div>
 
-        {error && (
-          <p className="text-sm text-destructive text-center">{error}</p>
-        )}
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Password *</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a password"
+                      className="pr-10"
+                      {...field}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      tabIndex={-1}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </FormControl>
+                <FormMessage />
+                {password && (
+                  <div className="mt-2 space-y-1">
+                    <div className="flex gap-1">
+                      {[1, 2, 3].map((level) => (
+                        <div
+                          key={level}
+                          className={cn(
+                            "h-1 flex-1 rounded-full transition-colors",
+                            level <= score
+                              ? score === 1
+                                ? "bg-destructive"
+                                : score === 2
+                                ? "bg-yellow-500"
+                                : "bg-success"
+                              : "bg-muted"
+                          )}
+                        />
+                      ))}
+                    </div>
+                    <p
+                      className={cn(
+                        "text-xs capitalize",
+                        score === 1 && "text-destructive",
+                        score === 2 && "text-yellow-600",
+                        score === 3 && "text-success"
+                      )}
+                    >
+                      {label}
+                    </p>
+                  </div>
+                )}
+              </FormItem>
+            )}
+          />
 
-        <Button
-          type="submit"
-          className="w-full h-12 text-base font-medium"
-          disabled={isLoading}
-        >
-          {isLoading ? <LoadingSpinner size="sm" /> : "Create Account"}
-        </Button>
-      </form>
+          <FormField
+            control={form.control}
+            name="confirmPassword"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Confirm Password *</FormLabel>
+                <FormControl>
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Confirm your password"
+                      className="pr-10"
+                      {...field}
+                    />
+                    {confirmPassword && password === confirmPassword && (
+                      <Check className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-success" />
+                    )}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="termsAccepted"
+            render={({ field }) => (
+              <FormItem>
+                <div className="flex items-start gap-3 pt-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <label className="text-sm leading-tight text-muted-foreground">
+                    I agree to the{" "}
+                    <Link to="/terms" className="text-primary hover:underline">
+                      Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link to="/privacy" className="text-primary hover:underline">
+                      Privacy Policy
+                    </Link>
+                  </label>
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <Button
+            type="submit"
+            className="w-full h-12 text-base font-medium"
+            disabled={isLoading}
+          >
+            {isLoading ? <LoadingSpinner size="sm" /> : "Create Account"}
+          </Button>
+        </form>
+      </Form>
 
       {/* Footer */}
       <div className="p-6 text-center">
