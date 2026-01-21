@@ -8,11 +8,11 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function DriverDashboard() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
   const [isOnline, setIsOnline] = useState(false);
 
   return (
-    <Layout userType="driver" userName={user?.name || "Driver"} onLogout={logout}>
+    <Layout userType="driver" userName={user?.name || "Driver"} onLogout={signOut}>
       <div className="p-4 space-y-6">
         {/* Header with Online Toggle */}
         <div className="flex items-center justify-between">

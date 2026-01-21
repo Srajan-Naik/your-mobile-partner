@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function PassengerDashboard() {
-  const { user, logout } = useAuth();
+  const { user, signOut } = useAuth();
 
   const stats = [
     { label: "Active Reports", value: 2, icon: Clock, color: "text-primary" },
@@ -14,7 +14,7 @@ export default function PassengerDashboard() {
   ];
 
   return (
-    <Layout userType="passenger" userName={user?.name || "Passenger"} onLogout={logout}>
+    <Layout userType="passenger" userName={user?.name || "Passenger"} onLogout={signOut}>
       <div className="p-4 space-y-6">
         {/* Welcome */}
         <div>

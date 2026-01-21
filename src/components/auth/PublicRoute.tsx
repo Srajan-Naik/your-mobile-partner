@@ -18,8 +18,13 @@ export function PublicRoute({ children }: PublicRouteProps) {
     );
   }
 
-  // Redirect authenticated users to their dashboard
+  // Redirect authenticated users to their dashboard or verification
   if (isAuthenticated && user) {
+    // If not verified, redirect to verification
+    if (!user.isVerified) {
+      return <Navigate to="/verify-phone" replace />;
+    }
+
     const from = location.state?.from?.pathname;
     const redirectPath = from || (user.userType === "driver" 
       ? "/driver/dashboard" 
