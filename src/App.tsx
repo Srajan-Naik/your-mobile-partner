@@ -7,12 +7,22 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { PublicRoute } from "@/components/auth/PublicRoute";
 
-// Pages
+// Auth Pages
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
 import VerifyPhone from "@/pages/VerifyPhone";
+
+// Passenger Pages
 import PassengerDashboard from "@/pages/PassengerDashboard";
+import ReportItem from "@/pages/ReportItem";
+import MyReports from "@/pages/MyReports";
+import ReportDetail from "@/pages/ReportDetail";
+
+// Driver Pages
 import DriverDashboard from "@/pages/DriverDashboard";
+import DriverReports from "@/pages/DriverReports";
+
+// Other Pages
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,10 +45,22 @@ const App = () => (
             <Route path="/passenger/dashboard" element={
               <ProtectedRoute requiredUserType="passenger"><PassengerDashboard /></ProtectedRoute>
             } />
+            <Route path="/report-item" element={
+              <ProtectedRoute requiredUserType="passenger"><ReportItem /></ProtectedRoute>
+            } />
+            <Route path="/my-reports" element={
+              <ProtectedRoute requiredUserType="passenger"><MyReports /></ProtectedRoute>
+            } />
+            <Route path="/report/:id" element={
+              <ProtectedRoute requiredUserType="passenger"><ReportDetail /></ProtectedRoute>
+            } />
 
             {/* Protected Driver Routes */}
             <Route path="/driver/dashboard" element={
               <ProtectedRoute requiredUserType="driver"><DriverDashboard /></ProtectedRoute>
+            } />
+            <Route path="/driver/reports" element={
+              <ProtectedRoute requiredUserType="driver"><DriverReports /></ProtectedRoute>
             } />
 
             {/* Catch-all */}

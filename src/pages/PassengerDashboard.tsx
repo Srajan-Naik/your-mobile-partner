@@ -1,16 +1,29 @@
 import { Link } from "react-router-dom";
-import { FileText, AlertTriangle, Clock, CheckCircle } from "lucide-react";
+import { FileText, AlertTriangle, Clock, CheckCircle, FileSearch } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLostItems, ITEM_CATEGORIES } from "@/hooks/use-lost-items";
+import { format } from "date-fns";
 
 export default function PassengerDashboard() {
   const { user, signOut } = useAuth();
+  const { data: allReports, isLoading } = useLostItems();
+
+  // Calculate stats
+  const activeCount = allReports?.filter((r) => r.status === "active").length || 0;
+  const resolvedCount = allReports?.filter((r) => r.status === "resolved").length || 0;
+  const recentReports = allReports?.slice(0, 3) || [];
+
+  const getCategoryIcon = (category: string) => {
+    return ITEM_CATEGORIES.find((c) => c.value === category)?.icon || "📦";
+  };
 
   const stats = [
-    { label: "Active Reports", value: 2, icon: Clock, color: "text-primary" },
-    { label: "Resolved", value: 5, icon: CheckCircle, color: "text-success" },
+    { label: "Active Reports", value: activeCount, icon: Clock, color: "text-primary" },
+    { label: "Resolved", value: resolvedCount, icon: CheckCircle, color: "text-success" },
   ];
 
   return (
@@ -34,20 +47,59 @@ export default function PassengerDashboard() {
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-3">
-          {stats.map((stat) => (
-            <Card key={stat.label}>
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className={`p-2 rounded-lg bg-muted ${stat.color}`}>
-                  <stat.icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{stat.value}</p>
-                  <p className="text-xs text-muted-foreground">{stat.label}</p>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          {isLoading ? (
+            <>
+              <LoadingSkeleton className="h-20 rounded-lg" />
+              <LoadingSkeleton className="h-20 rounded-lg" />
+            </>
+          ) : (
+            stats.map((stat) => (
+              <Card key={stat.label}>
+                <CardContent className="p-4 flex items-center gap-3">
+                  <div className={`p-2 rounded-lg bg-muted ${stat.color}`}>
+                    <stat.icon className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground">{stat.label}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </div>
+
+        {/* Recent Reports */}
+        {recentReports.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="font-heading font-semibold">Recent Reports</h2>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/my-reports">View All</Link>
+              </Button>
+            </div>
+            <div className="space-y-2">
+              {recentReports.map((report) => (
+                <Link key={report.id} to={`/report/${report.id}`}>
+                  <Card className="hover:bg-muted/50 transition-colors">
+                    <CardContent className="p-3 flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-lg bg-muted flex items-center justify-center text-xl">
+                        {getCategoryIcon(report.category)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{report.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {format(new Date(report.lost_date), "MMM d, yyyy")}
+                        </p>
+                      </div>
+                      <FileSearch className="h-4 w-4 text-muted-foreground" />
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Emergency */}
         <Card className="border-destructive/20 bg-destructive/5">
