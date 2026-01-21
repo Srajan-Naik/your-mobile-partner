@@ -1,0 +1,48 @@
+{
+  "name": "AutoConnect - Lost & Found for Auto Rickshaws",
+  "short_name": "AutoConnect",
+  "description": "Recover lost items from auto-rickshaws quickly. Connect with verified drivers and get your belongings back safely.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563EB",
+  "orientation": "portrait-primary",
+  "categories": ["utilities", "lifestyle", "transportation"],
+  "icons": [
+    {
+      "src": "/pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-maskable-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Report Lost Item",
+      "short_name": "Report",
+      "description": "Quickly report a lost item",
+      "url": "/report-item",
+      "icons": [{ "src": "/shortcut-report.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "My Reports",
+      "short_name": "Reports",
+      "description": "View your lost item reports",
+      "url": "/my-reports",
+      "icons": [{ "src": "/shortcut-reports.png", "sizes": "96x96" }]
+    }
+  ]
+}
