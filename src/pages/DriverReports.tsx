@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Filter, MapPin, Clock, Sparkles } from "lucide-react";
+import { Search, Filter, MapPin, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { ITEM_CATEGORIES } from "@/hooks/use-lost-items";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +18,7 @@ import { useRealtimeLostItems } from "@/hooks/use-realtime";
 
 export default function DriverReports() {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState("");
 
   // Enable real-time updates for new reports
@@ -57,13 +59,13 @@ export default function DriverReports() {
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="p-4 space-y-4 border-b">
-          <h1 className="font-heading text-xl font-bold">Available Reports</h1>
+          <h1 className="font-heading text-xl font-bold">{t("availableReportsTitle")}</h1>
 
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search by item or location..."
+              placeholder={t("searchByItemOrLocation")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -74,15 +76,15 @@ export default function DriverReports() {
           <div className="flex gap-2 overflow-x-auto pb-1">
             <Button variant="outline" size="sm">
               <Filter className="h-4 w-4 mr-2" />
-              All Categories
+              {t("allCategories")}
             </Button>
             <Button variant="outline" size="sm">
               <MapPin className="h-4 w-4 mr-2" />
-              Nearby
+              {t("nearby")}
             </Button>
             <Button variant="outline" size="sm">
               <Clock className="h-4 w-4 mr-2" />
-              Recent
+              {t("recent")}
             </Button>
           </div>
         </div>
@@ -100,11 +102,11 @@ export default function DriverReports() {
               <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
                 <Search className="h-8 w-8 text-muted-foreground" />
               </div>
-              <p className="font-medium">No active reports found</p>
+              <p className="font-medium">{t("noActiveReportsFound")}</p>
               <p className="text-sm text-muted-foreground mt-1">
                 {searchQuery
-                  ? "Try a different search term"
-                  : "Check back later for new reports"}
+                  ? t("tryDifferentSearch")
+                  : t("checkBackLater")}
               </p>
             </div>
           ) : (
@@ -124,11 +126,11 @@ export default function DriverReports() {
                           <div className="flex items-start justify-between gap-2">
                             <h3 className="font-medium">{report.title}</h3>
                             <Badge variant="secondary" className="flex-shrink-0">
-                              New
+                              {t("new")}
                             </Badge>
                           </div>
                           <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                            {report.description || "No description provided"}
+                            {report.description || t("noDescriptionProvided")}
                           </p>
                           <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                             <span className="flex items-center gap-1">
@@ -148,7 +150,7 @@ export default function DriverReports() {
                       {/* Action hint */}
                       <div className="mt-3 pt-3 border-t">
                         <p className="text-xs text-primary font-medium">
-                          Tap to view details and respond →
+                          {t("tapToViewDetails")}
                         </p>
                       </div>
                     </CardContent>

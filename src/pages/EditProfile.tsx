@@ -9,11 +9,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
 
 export default function EditProfile() {
   const navigate = useNavigate();
   const { user, profile, updateProfile, signOut } = useAuth();
+  const { t } = useLanguage();
 
   const [displayName, setDisplayName] = useState(profile?.display_name || "");
   const [email, setEmail] = useState(user?.email || "");
@@ -35,10 +37,10 @@ export default function EditProfile() {
         return;
       }
 
-      toast.success("Profile updated successfully");
+      toast.success(t("success"));
       navigate("/profile");
     } catch (err) {
-      toast.error("Failed to update profile");
+      toast.error(t("error"));
     } finally {
       setIsLoading(false);
     }
@@ -56,7 +58,7 @@ export default function EditProfile() {
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="font-heading text-xl font-bold">Edit Profile</h1>
+          <h1 className="font-heading text-xl font-bold">{t("editProfile")}</h1>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -79,7 +81,7 @@ export default function EditProfile() {
                 </Button>
               </div>
               <p className="text-sm text-muted-foreground mt-2">
-                Tap to change photo
+                {t("tapToChangePhoto")}
               </p>
             </CardContent>
           </Card>
@@ -88,17 +90,17 @@ export default function EditProfile() {
           <Card>
             <CardContent className="p-4 space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="displayName">Display Name</Label>
+                <Label htmlFor="displayName">{t("displayName")}</Label>
                 <Input
                   id="displayName"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Enter your name"
+                  placeholder={t("enterYourName")}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number</Label>
+                <Label htmlFor="phone">{t("phoneNumber")}</Label>
                 <Input
                   id="phone"
                   value={profile?.phone || user?.phone || ""}
@@ -106,28 +108,28 @@ export default function EditProfile() {
                   className="bg-muted"
                 />
                 <p className="text-xs text-muted-foreground">
-                  Phone number cannot be changed
+                  {t("phoneCannotChange")}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="email">Email (Optional)</Label>
+                <Label htmlFor="email">{t("emailOptional")}</Label>
                 <Input
                   id="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
+                  placeholder={t("enterYourEmail")}
                 />
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="bio">Bio (Optional)</Label>
+                <Label htmlFor="bio">{t("bioOptional")}</Label>
                 <Textarea
                   id="bio"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
-                  placeholder="Tell us a bit about yourself"
+                  placeholder={t("tellAboutYourself")}
                   rows={3}
                 />
               </div>
@@ -137,17 +139,17 @@ export default function EditProfile() {
           {/* Emergency Contact */}
           <Card>
             <CardContent className="p-4 space-y-4">
-              <h3 className="font-medium">Emergency Contact</h3>
+              <h3 className="font-medium">{t("emergencyContact")}</h3>
               <div className="space-y-2">
-                <Label htmlFor="emergencyContact">Phone Number</Label>
+                <Label htmlFor="emergencyContact">{t("phoneNumber")}</Label>
                 <Input
                   id="emergencyContact"
                   value={emergencyContact}
                   onChange={(e) => setEmergencyContact(e.target.value)}
-                  placeholder="Emergency contact number"
+                  placeholder={t("emergencyContactNumber")}
                 />
                 <p className="text-xs text-muted-foreground">
-                  This will be used in case of emergencies
+                  {t("usedInEmergencies")}
                 </p>
               </div>
             </CardContent>
@@ -156,7 +158,7 @@ export default function EditProfile() {
           {/* Submit */}
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            Save Changes
+            {t("saveChanges")}
           </Button>
         </form>
       </div>

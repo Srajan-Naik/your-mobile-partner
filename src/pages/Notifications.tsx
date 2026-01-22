@@ -5,7 +5,6 @@ import {
   Users,
   Gift,
   AlertCircle,
-  Check,
   Trash2,
   CheckCheck,
 } from "lucide-react";
@@ -14,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   useNotifications,
   useMarkNotificationRead,
@@ -27,6 +27,7 @@ import { cn } from "@/lib/utils";
 
 export default function Notifications() {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const { data: notifications, isLoading } = useNotifications();
   const markRead = useMarkNotificationRead();
   const markAllRead = useMarkAllNotificationsRead();
@@ -65,7 +66,7 @@ export default function Notifications() {
       <div className="p-4 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-bold">Notifications</h1>
+          <h1 className="font-heading text-2xl font-bold">{t("notifications")}</h1>
           {notifications && notifications.length > 0 && (
             <div className="flex gap-2">
               {unreadCount > 0 && (
@@ -76,7 +77,7 @@ export default function Notifications() {
                   disabled={markAllRead.isPending}
                 >
                   <CheckCheck className="h-4 w-4 mr-1" />
-                  Read all
+                  {t("readAll")}
                 </Button>
               )}
               <Button
@@ -87,7 +88,7 @@ export default function Notifications() {
                 className="text-destructive hover:text-destructive"
               >
                 <Trash2 className="h-4 w-4 mr-1" />
-                Clear
+                {t("clear")}
               </Button>
             </div>
           )}
@@ -102,9 +103,9 @@ export default function Notifications() {
         ) : notifications?.length === 0 ? (
           <div className="text-center py-12">
             <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-medium mb-1">No notifications</h3>
+            <h3 className="font-medium mb-1">{t("noNotifications")}</h3>
             <p className="text-sm text-muted-foreground">
-              You're all caught up!
+              {t("allCaughtUp")}
             </p>
           </div>
         ) : (

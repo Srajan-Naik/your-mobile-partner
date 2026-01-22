@@ -1,6 +1,7 @@
 import { format } from "date-fns";
 import { CalendarIcon, MapPin } from "lucide-react";
 import { UseFormReturn } from "react-hook-form";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Form,
   FormControl,
@@ -25,6 +26,7 @@ interface LocationTimeStepProps {
 }
 
 export function LocationTimeStep({ form }: LocationTimeStepProps) {
+  const { t } = useLanguage();
   return (
     <Form {...form}>
       <div className="space-y-6">
@@ -48,7 +50,7 @@ export function LocationTimeStep({ form }: LocationTimeStepProps) {
                       {field.value ? (
                         format(field.value, "PPP")
                       ) : (
-                        <span>Pick a date</span>
+                        <span>{t("pickDate")}</span>
                       )}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
