@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import { Camera, X, Upload, Image as ImageIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,18 @@ interface PhotosStepProps {
 }
 
 export function PhotosStep({ files, onFilesChange, maxFiles = 5 }: PhotosStepProps) {
+  const [previews, setPreviews] = useState<string[]>([]);
+
+  // Generate and cleanup preview URLs
+  useEffect(() => {
+    const urls = files.map((file) => URL.createObjectURL(file));
+    setPreviews(urls);
+
+    return () => {
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [files]);
+
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
       const newFiles = [...files, ...acceptedFiles].slice(0, maxFiles);
@@ -19,13 +31,15 @@ export function PhotosStep({ files, onFilesChange, maxFiles = 5 }: PhotosStepPro
     [files, onFilesChange, maxFiles]
   );
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, open } = useDropzone({
     onDrop,
     accept: {
       "image/*": [".jpeg", ".jpg", ".png", ".webp"],
     },
     maxFiles: maxFiles - files.length,
     disabled: files.length >= maxFiles,
+    noClick: false,
+    noKeyboard: false,
   });
 
   const removeFile = (index: number) => {
@@ -76,7 +90,10 @@ export function PhotosStep({ files, onFilesChange, maxFiles = 5 }: PhotosStepPro
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => document.querySelector<HTMLInputElement>('input[type="file"]')?.click()}
+          onClick={(e) => {
+            e.stopPropagation();
+            open();
+          }}
           disabled={files.length >= maxFiles}
         >
           <Camera className="h-4 w-4 mr-2" />
@@ -86,7 +103,10 @@ export function PhotosStep({ files, onFilesChange, maxFiles = 5 }: PhotosStepPro
           type="button"
           variant="outline"
           size="sm"
-          onClick={() => document.querySelector<HTMLInputElement>('input[type="file"]')?.click()}
+          onClick={(e) => {
+            e.stopPropagation();
+            open();
+          }}
           disabled={files.length >= maxFiles}
         >
           <ImageIcon className="h-4 w-4 mr-2" />
@@ -98,15 +118,24 @@ export function PhotosStep({ files, onFilesChange, maxFiles = 5 }: PhotosStepPro
       {files.length > 0 && (
         <div className="grid grid-cols-3 gap-3">
           {files.map((file, index) => (
-            <div key={index} className="relative aspect-square rounded-lg overflow-hidden">
-              <img
-                src={URL.createObjectURL(file)}
-                alt={`Upload ${index + 1}`}
-                className="w-full h-full object-cover"
-              />
+            <div key={`${file.name}-${index}`} className="relative aspect-square rounded-lg overflow-hidden border bg-muted">
+              {previews[index] ? (
+                <img
+                  src={previews[index]}
+                  alt={`Upload ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                </div>
+              )}
               <button
                 type="button"
-                onClick={() => removeFile(index)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeFile(index);
+                }}
                 className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white hover:bg-black/70"
               >
                 <X className="h-4 w-4" />
