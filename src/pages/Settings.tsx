@@ -2,7 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
-  Bell,
   Moon,
   Sun,
   MapPin,
@@ -11,8 +10,6 @@ import {
   LogOut,
   ChevronRight,
   Smartphone,
-  BellOff,
-  Loader2,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -27,12 +24,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
-import { usePushNotifications } from "@/hooks/use-push-notifications";
 
 export default function Settings() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { isSupported, isSubscribed, isLoading, permission, toggle } = usePushNotifications();
 
   const [locationServices, setLocationServices] = useState(true);
   const [darkMode, setDarkMode] = useState(false);
@@ -58,44 +53,9 @@ export default function Settings() {
           <h1 className="font-heading text-xl font-bold">Settings</h1>
         </div>
 
-        {/* Notifications */}
+        {/* Location Services */}
         <Card>
           <CardContent className="p-0">
-            <div className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  {isSubscribed ? (
-                    <Bell className="h-5 w-5 text-primary" />
-                  ) : (
-                    <BellOff className="h-5 w-5 text-primary" />
-                  )}
-                </div>
-                <div>
-                  <p className="font-medium">Push Notifications</p>
-                  <p className="text-sm text-muted-foreground">
-                    {!isSupported 
-                      ? "Not supported in this browser"
-                      : permission === "denied"
-                      ? "Notifications are blocked by browser"
-                      : isSubscribed 
-                      ? "Receiving real-time alerts" 
-                      : "Enable to receive alerts for matches and messages"}
-                  </p>
-                </div>
-              </div>
-              {isLoading ? (
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              ) : (
-                <Switch
-                  checked={isSubscribed}
-                  onCheckedChange={toggle}
-                  disabled={!isSupported || permission === "denied"}
-                />
-              )}
-            </div>
-
-            <Separator />
-
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-primary/10">
