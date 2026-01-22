@@ -19,7 +19,6 @@ import PassengerDashboard from "@/pages/PassengerDashboard";
 import ReportItem from "@/pages/ReportItem";
 import MyReports from "@/pages/MyReports";
 import ReportDetail from "@/pages/ReportDetail";
-import EditReport from "@/pages/EditReport";
 
 // Driver Pages
 import DriverDashboard from "@/pages/DriverDashboard";
@@ -71,9 +70,6 @@ const App = () => (
                 } />
                 <Route path="/report/:id" element={
                   <ProtectedRoute requiredUserType="passenger"><ReportDetail /></ProtectedRoute>
-                } />
-                <Route path="/report/:id/edit" element={
-                  <ProtectedRoute requiredUserType="passenger"><EditReport /></ProtectedRoute>
                 } />
 
                 {/* Protected Driver Routes */}

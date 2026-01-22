@@ -1,4 +1,4 @@
-import * as React from "react";
+import { useState } from "react";
 import { Header } from "./Header";
 import { BottomTabBar } from "./BottomTabBar";
 import { HamburgerMenu } from "./HamburgerMenu";
@@ -14,49 +14,41 @@ interface LayoutProps {
   onLogout?: () => void;
 }
 
-const Layout = React.forwardRef<HTMLDivElement, LayoutProps>(
-  (
-    {
-      children,
-      userType = "passenger",
-      userName,
-      userEmail,
-      notificationCount = 0,
-      showBottomNav = true,
-      showHeader = true,
-      onLogout,
-    },
-    ref
-  ) => {
-    const [menuOpen, setMenuOpen] = React.useState(false);
+export function Layout({
+  children,
+  userType = "passenger",
+  userName,
+  userEmail,
+  notificationCount = 0,
+  showBottomNav = true,
+  showHeader = true,
+  onLogout,
+}: LayoutProps) {
+  const [menuOpen, setMenuOpen] = useState(false);
 
-    return (
-      <div ref={ref} className="flex min-h-screen flex-col bg-background">
-        {showHeader && (
-          <Header
-            onMenuClick={() => setMenuOpen(true)}
-            notificationCount={notificationCount}
-          />
-        )}
-
-        <HamburgerMenu
-          open={menuOpen}
-          onOpenChange={setMenuOpen}
-          userName={userName}
-          userEmail={userEmail}
-          userType={userType}
-          onLogout={onLogout}
+  return (
+    <div className="flex min-h-screen flex-col bg-background">
+      {showHeader && (
+        <Header
+          onMenuClick={() => setMenuOpen(true)}
+          notificationCount={notificationCount}
         />
+      )}
 
-        <main className={`flex-1 ${showBottomNav ? "pb-20" : ""}`}>
-          {children}
-        </main>
+      <HamburgerMenu
+        open={menuOpen}
+        onOpenChange={setMenuOpen}
+        userName={userName}
+        userEmail={userEmail}
+        userType={userType}
+        onLogout={onLogout}
+      />
 
-        {showBottomNav && <BottomTabBar userType={userType} />}
-      </div>
-    );
-  }
-);
-Layout.displayName = "Layout";
+      <main className={`flex-1 ${showBottomNav ? "pb-20" : ""}`}>
+        {children}
+      </main>
 
-export { Layout };
+      {showBottomNav && <BottomTabBar userType={userType} />}
+    </div>
+  );
+}
