@@ -14,7 +14,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { format } from "date-fns";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,7 +35,106 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useGoBack } from "@/hooks/use-go-back";
 import { useLostItem, useDeleteLostItem, getImageUrl, ITEM_CATEGORIES, STATUS_CONFIG } from "@/hooks/use-lost-items";
+import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+
+// Component to show matched driver contact
+function MatchedDriverContact({ reportId, driverId }: { reportId: string; driverId: string }) {
+  const { t } = useLanguage();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [driverPhone, setDriverPhone] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      if (!user?.id) return;
+      
+      // Find conversation for this report
+      const { data: conv } = await supabase
+        .from("conversations")
+        .select("id")
+        .eq("lost_item_id", reportId)
+        .eq("driver_id", driverId)
+        .eq("passenger_id", user.id)
+        .single();
+      
+      if (conv) {
+        setConversationId(conv.id);
+      }
+      
+      // Get driver's phone
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("phone")
+        .eq("user_id", driverId)
+        .single();
+      
+      if (profile) {
+        setDriverPhone(profile.phone);
+      }
+      
+      setLoading(false);
+    }
+    
+    fetchData();
+  }, [reportId, driverId, user?.id]);
+
+  const handleChat = () => {
+    if (conversationId) {
+      navigate(`/chat/${conversationId}`);
+    }
+  };
+
+  const handleCall = () => {
+    if (driverPhone) {
+      window.location.href = `tel:${driverPhone}`;
+    }
+  };
+
+  if (loading) {
+    return (
+      <Card className="border-primary">
+        <CardContent className="p-6 flex justify-center">
+          <LoadingSpinner size="sm" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card className="border-primary">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-base text-primary">{t("driverContact")}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground mb-4">
+          {t("driverFoundItem")}
+        </p>
+        <div className="flex gap-2">
+          <Button 
+            className="flex-1" 
+            onClick={handleChat}
+            disabled={!conversationId}
+          >
+            <MessageCircle className="h-4 w-4 mr-2" />
+            {t("chat")}
+          </Button>
+          <Button 
+            variant="outline" 
+            className="flex-1"
+            onClick={handleCall}
+            disabled={!driverPhone}
+          >
+            <Phone className="h-4 w-4 mr-2" />
+            {t("call")}
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function ReportDetail() {
   const { id } = useParams<{ id: string }>();
@@ -295,26 +394,10 @@ export default function ReportDetail() {
 
             {/* Matched Driver Contact (if matched) */}
             {report.status === "matched" && report.matched_driver_id && (
-              <Card className="border-primary">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-base text-primary">{t("driverContact")}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {t("driverFoundItem")}
-                  </p>
-                  <div className="flex gap-2">
-                    <Button className="flex-1">
-                      <MessageCircle className="h-4 w-4 mr-2" />
-                      {t("chat")}
-                    </Button>
-                    <Button variant="outline" className="flex-1">
-                      <Phone className="h-4 w-4 mr-2" />
-                      {t("call")}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <MatchedDriverContact
+                reportId={report.id}
+                driverId={report.matched_driver_id}
+              />
             )}
           </div>
         </div>
