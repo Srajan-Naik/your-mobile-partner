@@ -1,4 +1,5 @@
 import { Bell, Menu } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
@@ -9,6 +10,8 @@ interface HeaderProps {
 }
 
 export function Header({ onMenuClick, notificationCount = 0, title = "AutoConnect" }: HeaderProps) {
+  const navigate = useNavigate();
+  
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 safe-top">
       <div className="flex h-14 items-center justify-between px-4">
@@ -49,6 +52,7 @@ export function Header({ onMenuClick, notificationCount = 0, title = "AutoConnec
           size="icon"
           className="relative h-9 w-9"
           aria-label="Notifications"
+          onClick={() => navigate("/notifications")}
         >
           <Bell className="h-5 w-5" />
           {notificationCount > 0 && (
