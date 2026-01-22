@@ -443,6 +443,9 @@ export type Database = {
           is_online: boolean
           is_verified: boolean
           last_seen_at: string | null
+          location_address: string | null
+          location_lat: number | null
+          location_lng: number | null
           phone: string | null
           updated_at: string
           user_id: string
@@ -459,6 +462,9 @@ export type Database = {
           is_online?: boolean
           is_verified?: boolean
           last_seen_at?: string | null
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
           phone?: string | null
           updated_at?: string
           user_id: string
@@ -475,6 +481,9 @@ export type Database = {
           is_online?: boolean
           is_verified?: boolean
           last_seen_at?: string | null
+          location_address?: string | null
+          location_lat?: number | null
+          location_lng?: number | null
           phone?: string | null
           updated_at?: string
           user_id?: string
@@ -620,6 +629,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      calculate_distance_km: {
+        Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
+      }
       create_notification: {
         Args: {
           _action_url?: string
