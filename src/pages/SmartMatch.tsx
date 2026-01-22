@@ -51,12 +51,14 @@ export default function SmartMatch() {
   const smartMatch = useSmartMatching();
   const createConversation = useCreateConversation();
 
+  const isFormValid = description.trim() && autoNumber.trim() && photos.length > 0;
+
   const handleSearch = () => {
-    if (!description.trim()) return;
+    if (!isFormValid) return;
     
     smartMatch.mutate({
       found_item_description: description.trim(),
-      auto_number: autoNumber.trim() || undefined,
+      auto_number: autoNumber.trim(),
       found_date: foundDate || undefined,
     });
   };
@@ -108,12 +110,16 @@ export default function SmartMatch() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="autoNumber">{t("autoNumberIfKnown")}</Label>
+                <Label htmlFor="autoNumber">
+                  {t("autoNumber") || "Auto Number"} <span className="text-destructive">*</span>
+                </Label>
                 <Input
                   id="autoNumber"
                   placeholder="e.g., KA01AB1234"
                   value={autoNumber}
-                  onChange={(e) => setAutoNumber(e.target.value)}
+                  onChange={(e) => setAutoNumber(e.target.value.toUpperCase())}
+                  className="uppercase"
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -127,11 +133,12 @@ export default function SmartMatch() {
               </div>
             </div>
 
-            {/* Photo Upload Section */}
             <div className="space-y-2">
-              <Label>{t("photos") || "Photos"} ({t("optional") || "Optional"})</Label>
+              <Label>
+                {t("photos") || "Photos"} <span className="text-destructive">*</span>
+              </Label>
               <p className="text-xs text-muted-foreground">
-                {t("addPhotosToHelp") || "Add photos of the found item to help with matching"}
+                {t("uploadAtLeastOnePhoto") || "Upload at least one photo of the found item"}
               </p>
               
               {photos.length < maxPhotos && (
@@ -205,7 +212,7 @@ export default function SmartMatch() {
 
             <Button
               onClick={handleSearch}
-              disabled={!description.trim() || smartMatch.isPending}
+              disabled={!isFormValid || smartMatch.isPending}
               className="w-full"
             >
               {smartMatch.isPending ? (
