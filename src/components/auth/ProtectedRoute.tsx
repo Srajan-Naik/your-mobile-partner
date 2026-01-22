@@ -23,11 +23,6 @@ export function ProtectedRoute({ children, requiredUserType }: ProtectedRoutePro
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Check if user needs phone verification
-  if (user && !user.isVerified) {
-    return <Navigate to="/verify-phone" state={{ from: location }} replace />;
-  }
-
   // Check for required user type
   if (requiredUserType && user?.userType !== requiredUserType) {
     const redirectPath = user?.userType === "driver" 
