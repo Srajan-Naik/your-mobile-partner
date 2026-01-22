@@ -142,7 +142,18 @@ export default function Chat() {
           </p>
         </div>
 
-        <Button variant="ghost" size="icon">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => {
+            const phone = conversation.other_user_profile?.phone;
+            if (phone) {
+              window.location.href = `tel:${phone}`;
+            }
+          }}
+          disabled={!conversation.other_user_profile?.phone}
+          title={conversation.other_user_profile?.phone ? t("callUser") : t("phoneNotAvailable")}
+        >
           <Phone className="h-5 w-5" />
         </Button>
 
