@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTheme } from "next-themes";
 import {
   ArrowLeft,
   Moon,
   Sun,
   MapPin,
-  Globe,
   Shield,
   LogOut,
   ChevronRight,
@@ -16,22 +16,20 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 
 export default function Settings() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { theme, setTheme } = useTheme();
 
   const [locationServices, setLocationServices] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
-  const [language, setLanguage] = useState("en");
+
+  const isDarkMode = theme === "dark";
+
+  const handleDarkModeChange = (checked: boolean) => {
+    setTheme(checked ? "dark" : "light");
+  };
 
   const handleLogout = async () => {
     await signOut();
@@ -82,7 +80,7 @@ export default function Settings() {
             <div className="flex items-center justify-between p-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-muted">
-                  {darkMode ? (
+                  {isDarkMode ? (
                     <Moon className="h-5 w-5" />
                   ) : (
                     <Sun className="h-5 w-5" />
@@ -95,35 +93,7 @@ export default function Settings() {
                   </p>
                 </div>
               </div>
-              <Switch checked={darkMode} onCheckedChange={setDarkMode} />
-            </div>
-
-            <Separator />
-
-            <div className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-muted">
-                  <Globe className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="font-medium">Language</p>
-                  <p className="text-sm text-muted-foreground">
-                    Select your preferred language
-                  </p>
-                </div>
-              </div>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger className="w-28">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="hi">हिंदी</SelectItem>
-                  <SelectItem value="ta">தமிழ்</SelectItem>
-                  <SelectItem value="te">తెలుగు</SelectItem>
-                  <SelectItem value="kn">ಕನ್ನಡ</SelectItem>
-                </SelectContent>
-              </Select>
+              <Switch checked={isDarkMode} onCheckedChange={handleDarkModeChange} />
             </div>
           </CardContent>
         </Card>
