@@ -33,12 +33,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useGoBack } from "@/hooks/use-go-back";
 import { useLostItem, useDeleteLostItem, getImageUrl, ITEM_CATEGORIES, STATUS_CONFIG } from "@/hooks/use-lost-items";
 import { cn } from "@/lib/utils";
 
 export default function ReportDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const goBack = useGoBack("/my-reports");
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -91,7 +93,7 @@ export default function ReportDetail() {
       <div className="flex flex-col h-full">
         {/* Header */}
         <div className="p-4 border-b flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" onClick={goBack}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">

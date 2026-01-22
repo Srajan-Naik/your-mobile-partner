@@ -26,9 +26,11 @@ import {
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useGoBack } from "@/hooks/use-go-back";
 
 export default function Settings() {
   const navigate = useNavigate();
+  const goBack = useGoBack();
   const { user, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
@@ -55,7 +57,7 @@ export default function Settings() {
       <div className="p-4 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" onClick={goBack}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="font-heading text-xl font-bold">{t("settings")}</h1>

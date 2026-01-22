@@ -21,6 +21,7 @@ import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useGoBack } from "@/hooks/use-go-back";
 import {
   useDriverVerification,
   useCreateOrUpdateDriverVerification,
@@ -33,6 +34,7 @@ import { cn } from "@/lib/utils";
 
 export default function DriverVerification() {
   const navigate = useNavigate();
+  const goBack = useGoBack("/driver/dashboard");
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const { data: verification, isLoading } = useDriverVerification();
@@ -182,7 +184,7 @@ export default function DriverVerification() {
       <div className="p-4 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" onClick={goBack}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
