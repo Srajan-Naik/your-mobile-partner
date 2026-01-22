@@ -1,16 +1,12 @@
 import { Link } from "react-router-dom";
-import { FileSearch, DollarSign, Star, ToggleLeft, ToggleRight, Loader2, Sparkles } from "lucide-react";
+import { FileSearch, DollarSign, Star, Sparkles } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
-import {
-  useDriverStatus,
-  useToggleDriverStatus,
-  useDriverPresence,
-} from "@/hooks/use-driver-status";
+import { useDriverPresence } from "@/hooks/use-driver-status";
 import { useRealtimeNotifications, useRealtimeLostItems } from "@/hooks/use-realtime";
 import { useUserAverageRating } from "@/hooks/use-reviews";
 import { useUserBalance } from "@/hooks/use-transactions";
@@ -18,48 +14,25 @@ import { useUserBalance } from "@/hooks/use-transactions";
 export default function DriverDashboard() {
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
-  const { data: status, isLoading: statusLoading } = useDriverStatus();
-  const toggleStatus = useToggleDriverStatus();
   const { data: rating } = useUserAverageRating(user?.id);
   const { data: balance } = useUserBalance();
 
-  // Enable real-time updates
+  // Enable real-time updates and auto-online status
   useRealtimeNotifications();
   useRealtimeLostItems();
   useDriverPresence();
 
-  const isOnline = status?.is_online ?? false;
-
-  const handleToggleStatus = () => {
-    toggleStatus.mutate(!isOnline);
-  };
-
   return (
     <Layout userType="driver" userName={user?.name || "Driver"} onLogout={signOut}>
       <div className="p-4 space-y-6">
-        {/* Header with Online Toggle */}
+        {/* Header */}
         <div className="flex items-center justify-between">
           <div>
             <h1 className="font-heading text-2xl font-bold">{t("driverDashboard")}</h1>
-            <Badge variant={isOnline ? "default" : "secondary"} className="mt-1">
-              {isOnline ? t("online") : t("offline")}
+            <Badge variant="default" className="mt-1">
+              {t("online")}
             </Badge>
           </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleToggleStatus}
-            disabled={statusLoading || toggleStatus.isPending}
-            className="h-12 w-12"
-          >
-            {toggleStatus.isPending ? (
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            ) : isOnline ? (
-              <ToggleRight className="h-8 w-8 text-success" />
-            ) : (
-              <ToggleLeft className="h-8 w-8 text-muted-foreground" />
-            )}
-          </Button>
         </div>
 
         {/* Stats */}
