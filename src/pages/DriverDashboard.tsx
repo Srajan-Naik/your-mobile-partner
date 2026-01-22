@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { FileSearch, DollarSign, Star, Sparkles } from "lucide-react";
+import { FileSearch, DollarSign, Star } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -68,12 +68,6 @@ export default function DriverDashboard() {
         {/* Action Buttons */}
         <div className="space-y-3">
           <Button asChild className="w-full h-14 text-base font-medium gap-2">
-            <Link to="/driver/smart-match">
-              <Sparkles className="h-5 w-5" />
-              {t("smartMatch")}
-            </Link>
-          </Button>
-          <Button asChild variant="outline" className="w-full h-14 text-base font-medium gap-2">
             <Link to="/driver/reports">
               <FileSearch className="h-5 w-5" />
               {t("browseLostItems")}
