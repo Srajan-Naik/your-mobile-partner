@@ -67,12 +67,11 @@ export function useToggleDriverStatus() {
  */
 export function useDriverPresence() {
   const { user } = useAuth();
-  const { data: status } = useDriverStatus();
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (!user?.id || user.userType !== "driver" || !status?.is_online) {
-      // Clear interval if driver goes offline or user changes
+    if (!user?.id || user.userType !== "driver") {
+      // Clear interval if user changes
       if (intervalRef.current) {
         clearInterval(intervalRef.current);
         intervalRef.current = null;
@@ -80,22 +79,25 @@ export function useDriverPresence() {
       return;
     }
 
-    // Update last_seen_at every 60 seconds while online
+    // Set driver online and update last_seen_at
     const updatePresence = async () => {
       try {
         await supabase
           .from("profiles")
-          .update({ last_seen_at: new Date().toISOString() })
+          .update({ 
+            is_online: true,
+            last_seen_at: new Date().toISOString() 
+          })
           .eq("user_id", user.id);
       } catch (error) {
         console.error("Failed to update presence:", error);
       }
     };
 
-    // Initial update
+    // Set online immediately when entering
     updatePresence();
 
-    // Set interval for updates
+    // Set interval for presence updates every 60 seconds
     intervalRef.current = setInterval(updatePresence, 60000);
 
     return () => {
@@ -104,7 +106,7 @@ export function useDriverPresence() {
         intervalRef.current = null;
       }
     };
-  }, [user?.id, user?.userType, status?.is_online]);
+  }, [user?.id, user?.userType]);
 
   // Set offline when leaving the page
   useEffect(() => {
