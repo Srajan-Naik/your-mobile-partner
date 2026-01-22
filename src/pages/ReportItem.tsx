@@ -176,7 +176,11 @@ export default function ReportItem() {
           <Form {...form}>
             <form id="report-form" onSubmit={form.handleSubmit(onSubmit)}>
               <div className={cn(currentStep !== 1 && "hidden")}>
-                <ItemDetailsStep form={form} />
+                <ItemDetailsStep 
+                  form={form} 
+                  files={uploadedFiles}
+                  onFilesChange={setUploadedFiles}
+                />
               </div>
               <div className={cn(currentStep !== 2 && "hidden")}>
                 <LocationTimeStep form={form} />
