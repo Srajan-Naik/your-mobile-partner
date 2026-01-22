@@ -1,49 +1,51 @@
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Phone, Shield, Car, AlertTriangle, ExternalLink } from "lucide-react";
+import { ArrowLeft, Phone, Shield, Car, AlertTriangle } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
-
-const EMERGENCY_CONTACTS = [
-  {
-    name: "Police Emergency",
-    number: "100",
-    description: "For immediate police assistance",
-    icon: Shield,
-    color: "text-destructive",
-    bgColor: "bg-destructive/10",
-  },
-  {
-    name: "Women Helpline",
-    number: "1091",
-    description: "24/7 women safety helpline",
-    icon: Phone,
-    color: "text-primary",
-    bgColor: "bg-primary/10",
-  },
-  {
-    name: "Transport Authority",
-    number: "1800-180-1947",
-    description: "Regional Transport Office helpline",
-    icon: Car,
-    color: "text-success",
-    bgColor: "bg-success/10",
-  },
-  {
-    name: "AutoConnect Support",
-    number: "+91-1800-XXX-XXXX",
-    description: "24/7 app support (toll-free)",
-    icon: Phone,
-    color: "text-primary",
-    bgColor: "bg-primary/10",
-  },
-];
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Emergency() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
+
+  const EMERGENCY_CONTACTS = [
+    {
+      nameKey: "policeEmergency",
+      number: "100",
+      descKey: "forImmediatePolice",
+      icon: Shield,
+      color: "text-destructive",
+      bgColor: "bg-destructive/10",
+    },
+    {
+      nameKey: "womenHelpline",
+      number: "1091",
+      descKey: "womenHelplineDesc",
+      icon: Phone,
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+    },
+    {
+      nameKey: "transportAuthority",
+      number: "1800-180-1947",
+      descKey: "transportAuthorityDesc",
+      icon: Car,
+      color: "text-success",
+      bgColor: "bg-success/10",
+    },
+    {
+      nameKey: "autoConnectSupport",
+      number: "+91-1800-XXX-XXXX",
+      descKey: "autoConnectSupportDesc",
+      icon: Phone,
+      color: "text-primary",
+      bgColor: "bg-primary/10",
+    },
+  ];
 
   const handleCall = (number: string) => {
     window.location.href = `tel:${number}`;
@@ -61,21 +63,21 @@ export default function Emergency() {
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="font-heading text-xl font-bold">Emergency Contacts</h1>
+          <h1 className="font-heading text-xl font-bold">{t("emergencyContactsTitle")}</h1>
         </div>
 
         {/* Alert */}
         <Alert variant="destructive" className="bg-destructive/10 border-destructive/20">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            If you're in immediate danger, call <strong>100</strong> for police assistance.
+            {t("immeditateDanger")} <strong>100</strong> {t("forPoliceAssistance")}
           </AlertDescription>
         </Alert>
 
         {/* Emergency Numbers */}
         <div className="space-y-3">
           {EMERGENCY_CONTACTS.map((contact) => (
-            <Card key={contact.name} className="overflow-hidden">
+            <Card key={contact.nameKey} className="overflow-hidden">
               <CardContent className="p-0">
                 <div className="flex items-center">
                   <div className="flex-1 p-4">
@@ -84,9 +86,9 @@ export default function Emergency() {
                         <contact.icon className={`h-6 w-6 ${contact.color}`} />
                       </div>
                       <div>
-                        <p className="font-medium">{contact.name}</p>
+                        <p className="font-medium">{t(contact.nameKey)}</p>
                         <p className="text-sm text-muted-foreground">
-                          {contact.description}
+                          {t(contact.descKey)}
                         </p>
                         <p className="text-lg font-bold mt-1">{contact.number}</p>
                       </div>
@@ -109,23 +111,23 @@ export default function Emergency() {
         {/* Safety Tips */}
         <Card>
           <CardContent className="p-4">
-            <h3 className="font-medium mb-3">Safety Tips</h3>
+            <h3 className="font-medium mb-3">{t("safetyTips")}</h3>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li className="flex items-start gap-2">
                 <span className="text-primary">•</span>
-                Always meet in public, well-lit places when retrieving items
+                {t("safetyTip1")}
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary">•</span>
-                Verify the driver's identity through the app before meeting
+                {t("safetyTip2")}
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary">•</span>
-                Share your live location with a trusted contact
+                {t("safetyTip3")}
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-primary">•</span>
-                Report any suspicious behavior immediately
+                {t("safetyTip4")}
               </li>
             </ul>
           </CardContent>
@@ -139,7 +141,7 @@ export default function Emergency() {
           onClick={() => handleCall("100")}
         >
           <Phone className="h-5 w-5 mr-2" />
-          Call Police (100)
+          {t("callPolice")}
         </Button>
       </div>
     </Layout>
