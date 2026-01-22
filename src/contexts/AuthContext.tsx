@@ -158,32 +158,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Convert phone to email for Supabase auth (workaround for disabled phone provider)
-  const phoneToEmail = (phone: string): string => {
-    // Remove all non-digit characters and create a deterministic email.
-    // NOTE: GoTrue validates email format strictly; use a real-looking domain.
-    const digits = phone.replace(/\D/g, "");
-    return `${digits}@phone.autoconnect.app`;
-  };
-
-  // Sign up with phone and password
+  // Sign up with phone and password (native Supabase phone auth)
   const signUp = async (phone: string, password: string, userType: UserType): Promise<{ error?: string }> => {
     setIsLoading(true);
     
     // Format phone number (ensure it starts with +)
     const formattedPhone = phone.startsWith("+") ? phone : `+${phone}`;
-    const email = phoneToEmail(formattedPhone);
     
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
+        phone: formattedPhone,
         password,
         options: {
           data: {
             user_type: userType,
-            phone: formattedPhone,
           },
-          emailRedirectTo: window.location.origin,
         },
       });
 
@@ -238,16 +227,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  // Sign in with phone and password
+  // Sign in with phone and password (native Supabase phone auth)
   const signIn = async (phone: string, password: string): Promise<{ error?: string }> => {
     setIsLoading(true);
     
     const formattedPhone = phone.startsWith("+") ? phone : `+${phone}`;
-    const email = phoneToEmail(formattedPhone);
     
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        email,
+        phone: formattedPhone,
         password,
       });
 
