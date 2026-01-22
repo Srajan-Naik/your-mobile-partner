@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User as SupabaseUser } from "@supabase/supabase-js";
 
@@ -59,6 +59,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [pendingPhone, setPendingPhone] = useState<string | null>(null);
   const [otpData, setOtpData] = useState<OtpData | null>(null);
+  const verificationOtpSentForUser = useRef<Set<string>>(new Set());
+  const otpDataRef = useRef<OtpData | null>(null);
+
+  useEffect(() => {
+    otpDataRef.current = otpData;
+  }, [otpData]);
 
   // Fetch profile from Supabase
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
@@ -87,48 +93,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     avatarUrl: profile?.avatar_url,
   });
 
-  // Initialize auth state
-  useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        console.log("Auth state change:", event);
-        setSession(currentSession);
-
-        if (currentSession?.user) {
-          // Use setTimeout to avoid Supabase deadlock
-          setTimeout(async () => {
-            const userProfile = await fetchProfile(currentSession.user.id);
-            setProfile(userProfile);
-            setUser(mapToUser(currentSession.user, userProfile));
-            setIsLoading(false);
-          }, 0);
-        } else {
-          setUser(null);
-          setProfile(null);
-          setIsLoading(false);
-        }
-      }
-    );
-
-    // THEN check for existing session
-    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
-      if (existingSession?.user) {
-        setSession(existingSession);
-        const userProfile = await fetchProfile(existingSession.user.id);
-        setProfile(userProfile);
-        setUser(mapToUser(existingSession.user, userProfile));
-      }
-      setIsLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   // Send OTP via Twilio edge function (internal helper)
-  const sendOtpToPhone = async (phone: string, type: "signup" | "login" | "resend"): Promise<{ error?: string }> => {
+  const sendOtpToPhone = async (
+    phone: string,
+    type: "signup" | "login" | "resend"
+  ): Promise<{ error?: string }> => {
     const formattedPhone = phone.startsWith("+") ? phone : `+${phone}`;
-    
+
     try {
       const response = await fetch(`${SUPABASE_URL}/functions/v1/send-otp`, {
         method: "POST",
@@ -158,6 +129,66 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Initialize auth state
+  useEffect(() => {
+    // Set up auth state listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, currentSession) => {
+        console.log("Auth state change:", event);
+        setSession(currentSession);
+
+        if (currentSession?.user) {
+          // Use setTimeout to avoid Supabase deadlock
+          setTimeout(async () => {
+            const userProfile = await fetchProfile(currentSession.user.id);
+            setProfile(userProfile);
+            setUser(mapToUser(currentSession.user, userProfile));
+
+            // If the user is authenticated but not verified, ensure we have a phone
+            // stored for the Verify Phone screen and (once per page-load) send a login OTP.
+            if (userProfile && !userProfile.is_verified) {
+              const phoneForOtp = userProfile.phone ?? currentSession.user.phone ?? null;
+              if (phoneForOtp) {
+                setPendingPhone(phoneForOtp);
+
+                if (
+                  !otpDataRef.current?.otpHash &&
+                  !verificationOtpSentForUser.current.has(currentSession.user.id)
+                ) {
+                  verificationOtpSentForUser.current.add(currentSession.user.id);
+                  const result = await sendOtpToPhone(phoneForOtp, "login");
+                  if (result.error) {
+                    console.error("Auto-send login OTP failed:", result.error);
+                  }
+                }
+              }
+            }
+
+            setIsLoading(false);
+          }, 0);
+        } else {
+          setUser(null);
+          setProfile(null);
+          verificationOtpSentForUser.current.clear();
+          setIsLoading(false);
+        }
+      }
+    );
+
+    // THEN check for existing session
+    supabase.auth.getSession().then(async ({ data: { session: existingSession } }) => {
+      if (existingSession?.user) {
+        setSession(existingSession);
+        const userProfile = await fetchProfile(existingSession.user.id);
+        setProfile(userProfile);
+        setUser(mapToUser(existingSession.user, userProfile));
+      }
+      setIsLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   // Sign up with phone and password (native Supabase phone auth)
   const signUp = async (phone: string, password: string, userType: UserType): Promise<{ error?: string }> => {
     setIsLoading(true);
@@ -182,6 +213,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (error.message.includes("already registered")) {
           return { error: "This phone number is already registered. Please login instead." };
         }
+
+        // If Supabase is still trying to send its own confirmation SMS, this will fail
+        // unless the Phone provider's Twilio settings are configured.
+        if ((error as any)?.code === "sms_send_failed") {
+          return {
+            error:
+              "Supabase signup is still attempting to send a confirmation SMS. In Supabase Dashboard → Auth → Providers → Phone, disable phone confirmation (Confirm phone), or configure Twilio there. After that, our custom OTP will handle verification.",
+          };
+        }
+
         return { error: error.message };
       }
 
@@ -234,7 +275,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const formattedPhone = phone.startsWith("+") ? phone : `+${phone}`;
     
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         phone: formattedPhone,
         password,
       });
@@ -246,6 +287,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { error: "Invalid phone number or password" };
         }
         return { error: error.message };
+      }
+
+      // If user logs in but hasn't completed our app-level verification yet,
+      // proactively send a login OTP so the Verify Phone screen can work immediately.
+      if (data.user?.id) {
+        const userProfile = await fetchProfile(data.user.id);
+        if (userProfile && !userProfile.is_verified) {
+          setPendingPhone(formattedPhone);
+          const otpResult = await sendOtpToPhone(formattedPhone, "login");
+          if (otpResult.error) {
+            console.error("Failed to send login OTP:", otpResult.error);
+          }
+        }
       }
 
       return {};
