@@ -1,3 +1,4 @@
+import * as React from "react";
 import { cn } from "@/lib/utils";
 
 interface LoadingSpinnerProps {
@@ -11,18 +12,24 @@ const sizeClasses = {
   lg: "h-12 w-12 border-3",
 };
 
-export function LoadingSpinner({ size = "md", className }: LoadingSpinnerProps) {
-  return (
-    <div
-      className={cn(
-        "animate-spin-slow rounded-full border-primary/30 border-t-primary",
-        sizeClasses[size],
-        className
-      )}
-      role="status"
-      aria-label="Loading"
-    >
-      <span className="sr-only">Loading...</span>
-    </div>
-  );
-}
+const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
+  ({ size = "md", className }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          "animate-spin-slow rounded-full border-primary/30 border-t-primary",
+          sizeClasses[size],
+          className
+        )}
+        role="status"
+        aria-label="Loading"
+      >
+        <span className="sr-only">Loading...</span>
+      </div>
+    );
+  }
+);
+LoadingSpinner.displayName = "LoadingSpinner";
+
+export { LoadingSpinner };
