@@ -1,4 +1,4 @@
-import { Home, FileText, MessageCircle, User, MoreHorizontal } from "lucide-react";
+import { Home, FileText, MessageCircle, User } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +13,6 @@ const passengerTabs: TabItem[] = [
   { icon: FileText, label: "Reports", path: "/my-reports" },
   { icon: MessageCircle, label: "Chat", path: "/chat" },
   { icon: User, label: "Profile", path: "/profile" },
-  { icon: MoreHorizontal, label: "More", path: "/more" },
 ];
 
 const driverTabs: TabItem[] = [
@@ -21,7 +20,6 @@ const driverTabs: TabItem[] = [
   { icon: FileText, label: "Reports", path: "/driver/reports" },
   { icon: MessageCircle, label: "Chat", path: "/chat" },
   { icon: User, label: "Profile", path: "/profile" },
-  { icon: MoreHorizontal, label: "More", path: "/more" },
 ];
 
 interface BottomTabBarProps {
