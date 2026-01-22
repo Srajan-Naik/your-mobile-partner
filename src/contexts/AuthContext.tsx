@@ -1,10 +1,8 @@
-import { createContext, useContext, useState, useEffect, useRef, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session, User as SupabaseUser } from "@supabase/supabase-js";
 
 type UserType = "passenger" | "driver" | null;
-
-const SUPABASE_URL = "https://jbynphyslmnxlwwbsxkh.supabase.co";
 
 interface Profile {
   id: string;
@@ -28,11 +26,6 @@ interface User {
   avatarUrl?: string | null;
 }
 
-interface OtpData {
-  otpHash: string;
-  expiresAt: string;
-}
-
 interface AuthContextType {
   user: User | null;
   profile: Profile | null;
@@ -42,12 +35,7 @@ interface AuthContextType {
   signUp: (phone: string, password: string, userType: UserType) => Promise<{ error?: string }>;
   signIn: (phone: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
-  verifyOtp: (phone: string, token: string) => Promise<{ error?: string; success: boolean }>;
-  resendOtp: (phone: string) => Promise<{ error?: string }>;
   updateProfile: (updates: Partial<Profile>) => Promise<{ error?: string }>;
-  pendingPhone: string | null;
-  setPendingPhone: (phone: string | null) => void;
-  sendOtp: (phone: string, type: "signup" | "login" | "resend") => Promise<{ error?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -57,14 +45,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [pendingPhone, setPendingPhone] = useState<string | null>(null);
-  const [otpData, setOtpData] = useState<OtpData | null>(null);
-  const verificationOtpSentForUser = useRef<Set<string>>(new Set());
-  const otpDataRef = useRef<OtpData | null>(null);
-
-  useEffect(() => {
-    otpDataRef.current = otpData;
-  }, [otpData]);
 
   // Fetch profile from Supabase
   const fetchProfile = async (userId: string): Promise<Profile | null> => {
@@ -93,42 +73,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     avatarUrl: profile?.avatar_url,
   });
 
-  // Send OTP via Twilio edge function (internal helper)
-  const sendOtpToPhone = async (
-    phone: string,
-    type: "signup" | "login" | "resend"
-  ): Promise<{ error?: string }> => {
-    const formattedPhone = phone.startsWith("+") ? phone : `+${phone}`;
-
-    try {
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/send-otp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ phone: formattedPhone, type }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error("Send OTP error:", data);
-        return { error: data.error || "Failed to send verification code" };
-      }
-
-      // Store OTP hash for verification
-      setOtpData({
-        otpHash: data.otpHash,
-        expiresAt: data.expiresAt,
-      });
-
-      return {};
-    } catch (err) {
-      console.error("Send OTP exception:", err);
-      return { error: "Failed to send verification code" };
-    }
-  };
-
   // Initialize auth state
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -143,33 +87,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const userProfile = await fetchProfile(currentSession.user.id);
             setProfile(userProfile);
             setUser(mapToUser(currentSession.user, userProfile));
-
-            // If the user is authenticated but not verified, ensure we have a phone
-            // stored for the Verify Phone screen and (once per page-load) send a login OTP.
-            if (userProfile && !userProfile.is_verified) {
-              const phoneForOtp = userProfile.phone ?? currentSession.user.phone ?? null;
-              if (phoneForOtp) {
-                setPendingPhone(phoneForOtp);
-
-                if (
-                  !otpDataRef.current?.otpHash &&
-                  !verificationOtpSentForUser.current.has(currentSession.user.id)
-                ) {
-                  verificationOtpSentForUser.current.add(currentSession.user.id);
-                  const result = await sendOtpToPhone(phoneForOtp, "login");
-                  if (result.error) {
-                    console.error("Auto-send login OTP failed:", result.error);
-                  }
-                }
-              }
-            }
-
             setIsLoading(false);
           }, 0);
         } else {
           setUser(null);
           setProfile(null);
-          verificationOtpSentForUser.current.clear();
           setIsLoading(false);
         }
       }
@@ -219,7 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if ((error as any)?.code === "sms_send_failed") {
           return {
             error:
-              "Supabase signup is still attempting to send a confirmation SMS. In Supabase Dashboard → Auth → Providers → Phone, disable phone confirmation (Confirm phone), or configure Twilio there. After that, our custom OTP will handle verification.",
+              "Supabase signup is still attempting to send a confirmation SMS. In Supabase Dashboard → Auth → Providers → Phone, disable phone confirmation (Confirm phone), or configure Twilio there.",
           };
         }
 
@@ -227,17 +149,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.user) {
-        // Store pending phone for OTP verification
-        setPendingPhone(formattedPhone);
-        
-        // IMPORTANT: Mark this user as having OTP sent BEFORE sending,
-        // to prevent the onAuthStateChange listener from sending a duplicate OTP
-        verificationOtpSentForUser.current.add(data.user.id);
-        
-        // Update profile with user type and phone
+        // Update profile with user type, phone, and mark as verified (no OTP step)
         const { error: profileError } = await supabase
           .from("profiles")
-          .update({ user_type: userType, phone: formattedPhone })
+          .update({ user_type: userType, phone: formattedPhone, is_verified: true })
           .eq("user_id", data.user.id);
 
         if (profileError) {
@@ -253,13 +168,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (roleError && !roleError.message.includes("duplicate")) {
             console.error("Role insert error:", roleError);
           }
-        }
-
-        // Send OTP via Twilio
-        const otpResult = await sendOtpToPhone(formattedPhone, "signup");
-        if (otpResult.error) {
-          console.error("Failed to send OTP:", otpResult.error);
-          // Don't fail signup, just log the error
         }
       }
 
@@ -293,22 +201,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: error.message };
       }
 
-      // If user logs in but hasn't completed our app-level verification yet,
-      // proactively send a login OTP so the Verify Phone screen can work immediately.
-      if (data.user?.id) {
-        // Mark before sending to prevent duplicate from auth listener
-        verificationOtpSentForUser.current.add(data.user.id);
-        
-        const userProfile = await fetchProfile(data.user.id);
-        if (userProfile && !userProfile.is_verified) {
-          setPendingPhone(formattedPhone);
-          const otpResult = await sendOtpToPhone(formattedPhone, "login");
-          if (otpResult.error) {
-            console.error("Failed to send login OTP:", otpResult.error);
-          }
-        }
-      }
-
       return {};
     } catch (err) {
       console.error("SignIn exception:", err);
@@ -326,78 +218,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(null);
       setProfile(null);
       setSession(null);
-      setPendingPhone(null);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Verify OTP via Twilio edge function
-  const verifyOtp = async (phone: string, token: string): Promise<{ error?: string; success: boolean }> => {
-    setIsLoading(true);
-    
-    const formattedPhone = phone.startsWith("+") ? phone : `+${phone}`;
-    
-    try {
-      if (!otpData?.otpHash) {
-        return { error: "No pending verification. Please request a new code.", success: false };
-      }
-
-      // Check if OTP expired
-      if (new Date(otpData.expiresAt) < new Date()) {
-        setOtpData(null);
-        return { error: "Verification code expired. Please request a new one.", success: false };
-      }
-
-      const response = await fetch(`${SUPABASE_URL}/functions/v1/verify-otp`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          phone: formattedPhone, 
-          otp: token, 
-          otpHash: otpData.otpHash 
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        console.error("OTP verification error:", data);
-        return { error: data.error || "Invalid verification code", success: false };
-      }
-
-      // Clear OTP data and pending phone
-      setOtpData(null);
-      setPendingPhone(null);
-
-      // Refresh profile to get updated verification status
-      if (user?.id) {
-        const updatedProfile = await fetchProfile(user.id);
-        if (updatedProfile) {
-          setProfile(updatedProfile);
-          setUser(prev => prev ? { ...prev, isVerified: true } : null);
-        }
-      }
-
-      return { success: true };
-    } catch (err) {
-      console.error("OTP verification exception:", err);
-      return { error: "An unexpected error occurred", success: false };
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Public sendOtp function (delegates to helper)
-  const sendOtp = async (phone: string, type: "signup" | "login" | "resend"): Promise<{ error?: string }> => {
-    return sendOtpToPhone(phone, type);
-  };
-
-  // Resend OTP via Twilio
-  const resendOtp = async (phone: string): Promise<{ error?: string }> => {
-    return sendOtpToPhone(phone, "resend");
   };
 
   // Update profile
@@ -442,12 +265,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         signUp,
         signIn,
         signOut,
-        verifyOtp,
-        resendOtp,
         updateProfile,
-        pendingPhone,
-        setPendingPhone,
-        sendOtp,
       }}
     >
       {children}

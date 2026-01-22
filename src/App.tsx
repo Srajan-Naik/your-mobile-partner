@@ -13,7 +13,6 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 // Auth Pages
 import Login from "@/pages/Login";
 import Signup from "@/pages/Signup";
-import VerifyPhone from "@/pages/VerifyPhone";
 
 // Passenger Pages
 import PassengerDashboard from "@/pages/PassengerDashboard";
@@ -57,7 +56,6 @@ const App = () => (
                 <Route path="/" element={<Navigate to="/login" replace />} />
                 <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
                 <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-                <Route path="/verify-phone" element={<VerifyPhone />} />
 
                 {/* Protected Passenger Routes */}
                 <Route path="/passenger/dashboard" element={
