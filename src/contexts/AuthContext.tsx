@@ -230,6 +230,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Store pending phone for OTP verification
         setPendingPhone(formattedPhone);
         
+        // IMPORTANT: Mark this user as having OTP sent BEFORE sending,
+        // to prevent the onAuthStateChange listener from sending a duplicate OTP
+        verificationOtpSentForUser.current.add(data.user.id);
+        
         // Update profile with user type and phone
         const { error: profileError } = await supabase
           .from("profiles")
@@ -292,6 +296,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // If user logs in but hasn't completed our app-level verification yet,
       // proactively send a login OTP so the Verify Phone screen can work immediately.
       if (data.user?.id) {
+        // Mark before sending to prevent duplicate from auth listener
+        verificationOtpSentForUser.current.add(data.user.id);
+        
         const userProfile = await fetchProfile(data.user.id);
         if (userProfile && !userProfile.is_verified) {
           setPendingPhone(formattedPhone);
