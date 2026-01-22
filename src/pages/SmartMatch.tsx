@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Sparkles, Loader2, MapPin, Calendar, ChevronRight, CheckCircle2 } from "lucide-react";
+import { useDropzone } from "react-dropzone";
+import { Search, Sparkles, Loader2, MapPin, Calendar, ChevronRight, CheckCircle2, Upload, X, Camera, Image as ImageIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,29 @@ export default function SmartMatch() {
   const [description, setDescription] = useState("");
   const [autoNumber, setAutoNumber] = useState("");
   const [foundDate, setFoundDate] = useState("");
+  const [photos, setPhotos] = useState<File[]>([]);
+  const maxPhotos = 3;
+
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const newFiles = [...photos, ...acceptedFiles].slice(0, maxPhotos);
+      setPhotos(newFiles);
+    },
+    [photos]
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "image/*": [".jpeg", ".jpg", ".png", ".webp"],
+    },
+    maxFiles: maxPhotos - photos.length,
+    disabled: photos.length >= maxPhotos,
+  });
+
+  const removePhoto = (index: number) => {
+    setPhotos(photos.filter((_, i) => i !== index));
+  };
   
   const smartMatch = useSmartMatching();
   const createConversation = useCreateConversation();
@@ -101,6 +125,82 @@ export default function SmartMatch() {
                   onChange={(e) => setFoundDate(e.target.value)}
                 />
               </div>
+            </div>
+
+            {/* Photo Upload Section */}
+            <div className="space-y-2">
+              <Label>{t("photos") || "Photos"} ({t("optional") || "Optional"})</Label>
+              <p className="text-xs text-muted-foreground">
+                {t("addPhotosToHelp") || "Add photos of the found item to help with matching"}
+              </p>
+              
+              {photos.length < maxPhotos && (
+                <div
+                  {...getRootProps()}
+                  className={cn(
+                    "border-2 border-dashed rounded-lg p-4 text-center cursor-pointer transition-colors",
+                    isDragActive
+                      ? "border-primary bg-primary/5"
+                      : "border-muted-foreground/25 hover:border-primary/50"
+                  )}
+                >
+                  <input {...getInputProps()} />
+                  <Upload className="h-6 w-6 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">
+                    {isDragActive ? t("dropHere") || "Drop here" : t("dragOrClick") || "Drag & drop or click to upload"}
+                  </p>
+                </div>
+              )}
+
+              {/* Quick Actions */}
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.querySelector<HTMLInputElement>('input[type="file"]')?.click()}
+                  disabled={photos.length >= maxPhotos}
+                >
+                  <Camera className="h-4 w-4 mr-1" />
+                  {t("takePhoto") || "Take Photo"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => document.querySelector<HTMLInputElement>('input[type="file"]')?.click()}
+                  disabled={photos.length >= maxPhotos}
+                >
+                  <ImageIcon className="h-4 w-4 mr-1" />
+                  {t("gallery") || "Gallery"}
+                </Button>
+              </div>
+
+              {/* Photo Previews */}
+              {photos.length > 0 && (
+                <div className="grid grid-cols-3 gap-2">
+                  {photos.map((file, index) => (
+                    <div key={index} className="relative aspect-square rounded-lg overflow-hidden border">
+                      <img
+                        src={URL.createObjectURL(file)}
+                        alt={`Photo ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removePhoto(index)}
+                        className="absolute top-1 right-1 p-1 rounded-full bg-black/50 text-white hover:bg-black/70"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <p className="text-xs text-muted-foreground text-center">
+                {photos.length}/{maxPhotos} {t("photosUploaded") || "photos"}
+              </p>
             </div>
 
             <Button
