@@ -25,7 +25,6 @@ import DriverDashboard from "@/pages/DriverDashboard";
 import DriverReports from "@/pages/DriverReports";
 import DriverReportDetail from "@/pages/DriverReportDetail";
 import DriverVerification from "@/pages/DriverVerification";
-import SmartMatch from "@/pages/SmartMatch";
 
 // Shared Pages
 import Conversations from "@/pages/Conversations";
@@ -85,9 +84,6 @@ const App = () => (
                 } />
                 <Route path="/driver/verification" element={
                   <ProtectedRoute requiredUserType="driver"><DriverVerification /></ProtectedRoute>
-                } />
-                <Route path="/driver/smart-match" element={
-                  <ProtectedRoute requiredUserType="driver"><SmartMatch /></ProtectedRoute>
                 } />
 
                 {/* Shared Protected Routes */}
