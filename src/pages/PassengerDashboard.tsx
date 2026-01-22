@@ -6,11 +6,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLostItems, ITEM_CATEGORIES } from "@/hooks/use-lost-items";
+import { useRealtimeNotifications, useRealtimeConversations } from "@/hooks/use-realtime";
 import { format } from "date-fns";
 
 export default function PassengerDashboard() {
   const { user, signOut } = useAuth();
   const { data: allReports, isLoading } = useLostItems();
+
+  // Enable real-time updates
+  useRealtimeNotifications();
+  useRealtimeConversations();
 
   // Calculate stats
   const activeCount = allReports?.filter((r) => r.status === "active").length || 0;

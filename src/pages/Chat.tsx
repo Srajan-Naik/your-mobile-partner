@@ -21,6 +21,7 @@ import {
   useMarkMessagesRead,
   Message,
 } from "@/hooks/use-conversations";
+import { useRealtimeMessages } from "@/hooks/use-realtime";
 import { format, isToday, isYesterday } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -34,6 +35,9 @@ export default function Chat() {
   const { data: messages, isLoading: messagesLoading } = useMessages(conversationId);
   const sendMessage = useSendMessage();
   const markRead = useMarkMessagesRead();
+
+  // Enable real-time message updates
+  useRealtimeMessages(conversationId);
 
   // Scroll to bottom when messages change
   useEffect(() => {

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Search, Filter, MapPin, Clock } from "lucide-react";
+import { Search, Filter, MapPin, Clock, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -13,10 +13,14 @@ import { ITEM_CATEGORIES } from "@/hooks/use-lost-items";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { LostItem } from "@/hooks/use-lost-items";
+import { useRealtimeLostItems } from "@/hooks/use-realtime";
 
 export default function DriverReports() {
   const { user, signOut } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Enable real-time updates for new reports
+  useRealtimeLostItems();
 
   // Fetch active reports for drivers
   const { data: reports, isLoading } = useQuery({
