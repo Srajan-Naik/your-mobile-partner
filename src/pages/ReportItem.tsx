@@ -7,6 +7,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Form } from "@/components/ui/form";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useGoBack } from "@/hooks/use-go-back";
@@ -172,29 +173,31 @@ export default function ReportItem() {
 
         {/* Form Content */}
         <div className="flex-1 overflow-auto p-4">
-          <form id="report-form" onSubmit={form.handleSubmit(onSubmit)}>
-            <div className={cn(currentStep !== 1 && "hidden")}>
-              <ItemDetailsStep form={form} />
-            </div>
-            <div className={cn(currentStep !== 2 && "hidden")}>
-              <LocationTimeStep form={form} />
-            </div>
-            <div className={cn(currentStep !== 3 && "hidden")}>
-              <AutoDetailsStep form={form} />
-            </div>
-            <div className={cn(currentStep !== 4 && "hidden")}>
-              <PhotosStep
-                files={uploadedFiles}
-                onFilesChange={setUploadedFiles}
-              />
-            </div>
+          <Form {...form}>
+            <form id="report-form" onSubmit={form.handleSubmit(onSubmit)}>
+              <div className={cn(currentStep !== 1 && "hidden")}>
+                <ItemDetailsStep form={form} />
+              </div>
+              <div className={cn(currentStep !== 2 && "hidden")}>
+                <LocationTimeStep form={form} />
+              </div>
+              <div className={cn(currentStep !== 3 && "hidden")}>
+                <AutoDetailsStep form={form} />
+              </div>
+              <div className={cn(currentStep !== 4 && "hidden")}>
+                <PhotosStep
+                  files={uploadedFiles}
+                  onFilesChange={setUploadedFiles}
+                />
+              </div>
 
-            {form.formState.errors.root && (
-              <p className="text-sm text-destructive mt-4">
-                {form.formState.errors.root.message}
-              </p>
-            )}
-          </form>
+              {form.formState.errors.root && (
+                <p className="text-sm text-destructive mt-4">
+                  {form.formState.errors.root.message}
+                </p>
+              )}
+            </form>
+          </Form>
         </div>
 
         {/* Footer Actions */}
