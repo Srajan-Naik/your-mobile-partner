@@ -10,6 +10,10 @@ import {
   X,
   Loader2,
   AlertCircle,
+  Car,
+  User,
+  Phone,
+  MapPin,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
@@ -44,6 +48,9 @@ export default function DriverVerification() {
 
   const [licenseNumber, setLicenseNumber] = useState(verification?.license_number || "");
   const [vehicleNumber, setVehicleNumber] = useState(verification?.vehicle_registration_number || "");
+  const [driverName, setDriverName] = useState(user?.name || "");
+  const [phoneNumber, setPhoneNumber] = useState(user?.phone || "");
+  const [autoStandLocation, setAutoStandLocation] = useState("");
 
   const getStatusBadge = () => {
     switch (verification?.status) {
@@ -232,13 +239,65 @@ export default function DriverVerification() {
           </Alert>
         )}
 
-        {/* License Info */}
+        {/* Driver Details */}
         {verification?.status !== "approved" && verification?.status !== "submitted" && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">{t("licenseDetails")}</CardTitle>
+              <CardTitle className="text-base">{t("driverDetails") || "Driver Details"}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="driverName">{t("name") || "Name"}</Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="driverName"
+                    value={driverName}
+                    onChange={(e) => setDriverName(e.target.value)}
+                    placeholder={t("enterName") || "Enter your full name"}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phoneNumber">{t("phoneNumber") || "Phone Number"}</Label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="phoneNumber"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder={t("enterPhoneNumber") || "Enter your phone number"}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="vehicleNumber">{t("autoNumber") || "Auto Number"}</Label>
+                <div className="relative">
+                  <Car className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="vehicleNumber"
+                    value={vehicleNumber}
+                    onChange={(e) => setVehicleNumber(e.target.value.toUpperCase())}
+                    placeholder={t("enterAutoNumber") || "e.g., KA 01 AB 1234"}
+                    className="pl-10 uppercase"
+                  />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="autoStandLocation">{t("autoStandLocation") || "Auto Stand Location"}</Label>
+                <div className="relative">
+                  <MapPin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    id="autoStandLocation"
+                    value={autoStandLocation}
+                    onChange={(e) => setAutoStandLocation(e.target.value)}
+                    placeholder={t("enterAutoStandLocation") || "e.g., Koramangala Bus Stand"}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="licenseNumber">{t("licenseNumber")}</Label>
                 <Input
@@ -246,15 +305,6 @@ export default function DriverVerification() {
                   value={licenseNumber}
                   onChange={(e) => setLicenseNumber(e.target.value)}
                   placeholder={t("enterLicenseNumber")}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="vehicleNumber">{t("vehicleRegNumber")}</Label>
-                <Input
-                  id="vehicleNumber"
-                  value={vehicleNumber}
-                  onChange={(e) => setVehicleNumber(e.target.value)}
-                  placeholder={t("enterVehicleReg")}
                 />
               </div>
             </CardContent>
