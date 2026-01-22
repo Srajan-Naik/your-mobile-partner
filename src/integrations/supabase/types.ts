@@ -631,6 +631,25 @@ export type Database = {
         }
         Returns: string
       }
+      get_driver_public_profile: {
+        Args: { _driver_user_id: string }
+        Returns: {
+          avatar_url: string
+          bio: string
+          display_name: string
+          is_online: boolean
+          is_verified: boolean
+          last_seen_at: string
+          user_id: string
+        }[]
+      }
+      get_driver_rating: {
+        Args: { _driver_user_id: string }
+        Returns: {
+          avg_rating: number
+          review_count: number
+        }[]
+      }
       get_user_type: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_type"]
