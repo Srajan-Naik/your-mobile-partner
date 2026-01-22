@@ -23,6 +23,7 @@ import ReportDetail from "@/pages/ReportDetail";
 // Driver Pages
 import DriverDashboard from "@/pages/DriverDashboard";
 import DriverReports from "@/pages/DriverReports";
+import DriverReportDetail from "@/pages/DriverReportDetail";
 import DriverVerification from "@/pages/DriverVerification";
 import SmartMatch from "@/pages/SmartMatch";
 
@@ -77,6 +78,9 @@ const App = () => (
                 } />
                 <Route path="/driver/reports" element={
                   <ProtectedRoute requiredUserType="driver"><DriverReports /></ProtectedRoute>
+                } />
+                <Route path="/driver/report/:id" element={
+                  <ProtectedRoute requiredUserType="driver"><DriverReportDetail /></ProtectedRoute>
                 } />
                 <Route path="/driver/verification" element={
                   <ProtectedRoute requiredUserType="driver"><DriverVerification /></ProtectedRoute>
