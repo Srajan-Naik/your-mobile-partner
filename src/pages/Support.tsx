@@ -7,14 +7,11 @@ import {
   Phone,
   AlertTriangle,
   ChevronRight,
-  ChevronDown,
   Send,
-  ExternalLink,
 } from "lucide-react";
 import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -31,59 +28,55 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { toast } from "sonner";
-
-const FAQ_ITEMS = [
-  {
-    question: "How do I report a lost item?",
-    answer:
-      "Tap the 'Report Lost Item' button on your dashboard. Fill in the item details, location where you lost it, and any information about the auto-rickshaw. Add photos if possible to help drivers identify your item.",
-  },
-  {
-    question: "How does the matching work?",
-    answer:
-      "Our system matches your lost item report with verified drivers in the area. When a driver responds, you'll receive a notification and can chat with them directly to verify and arrange the return.",
-  },
-  {
-    question: "Is there a fee for using AutoConnect?",
-    answer:
-      "AutoConnect is free to use. However, we encourage passengers to tip drivers who return their lost items as a token of appreciation.",
-  },
-  {
-    question: "How are drivers verified?",
-    answer:
-      "Drivers must submit their driver's license, vehicle registration, and a photo for identity verification. Our team reviews these documents before approving drivers on the platform.",
-  },
-  {
-    question: "What if I can't find my item?",
-    answer:
-      "If no driver responds within 48 hours, your report will remain active but marked as expired. You can also report the loss to local authorities using the emergency contacts in the app.",
-  },
-  {
-    question: "How do I send a tip to a driver?",
-    answer:
-      "After your item is returned and the conversation is marked as resolved, you'll have the option to rate the driver and send a tip as a thank you.",
-  },
-];
 
 export default function Support() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const [feedbackType, setFeedbackType] = useState("");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const FAQ_ITEMS = [
+    {
+      question: t("faqReportItem"),
+      answer: t("faqReportItemAnswer"),
+    },
+    {
+      question: t("faqMatching"),
+      answer: t("faqMatchingAnswer"),
+    },
+    {
+      question: t("faqFee"),
+      answer: t("faqFeeAnswer"),
+    },
+    {
+      question: t("faqDriverVerification"),
+      answer: t("faqDriverVerificationAnswer"),
+    },
+    {
+      question: t("faqCantFind"),
+      answer: t("faqCantFindAnswer"),
+    },
+    {
+      question: t("faqSendTip"),
+      answer: t("faqSendTipAnswer"),
+    },
+  ];
+
   const handleSubmitFeedback = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!feedbackType || !feedbackMessage.trim()) {
-      toast.error("Please fill in all fields");
+      toast.error(t("error"));
       return;
     }
 
     setIsSubmitting(true);
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    toast.success("Thank you for your feedback!");
+    toast.success(t("success") + "!");
     setFeedbackType("");
     setFeedbackMessage("");
     setIsSubmitting(false);
@@ -101,7 +94,7 @@ export default function Support() {
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="font-heading text-xl font-bold">Help & Support</h1>
+          <h1 className="font-heading text-xl font-bold">{t("helpAndSupport")}</h1>
         </div>
 
         {/* Quick Actions */}
@@ -109,8 +102,8 @@ export default function Support() {
           <Card className="cursor-pointer hover:bg-muted/50 transition-colors">
             <CardContent className="p-4 text-center">
               <MessageCircle className="h-8 w-8 text-primary mx-auto mb-2" />
-              <p className="font-medium text-sm">Live Chat</p>
-              <p className="text-xs text-muted-foreground">Chat with support</p>
+              <p className="font-medium text-sm">{t("liveChat")}</p>
+              <p className="text-xs text-muted-foreground">{t("chatWithSupport")}</p>
             </CardContent>
           </Card>
 
@@ -118,8 +111,8 @@ export default function Support() {
             <Card className="cursor-pointer hover:bg-muted/50 transition-colors h-full">
               <CardContent className="p-4 text-center">
                 <Phone className="h-8 w-8 text-destructive mx-auto mb-2" />
-                <p className="font-medium text-sm">Emergency</p>
-                <p className="text-xs text-muted-foreground">Quick contacts</p>
+                <p className="font-medium text-sm">{t("emergency")}</p>
+                <p className="text-xs text-muted-foreground">{t("quickContacts")}</p>
               </CardContent>
             </Card>
           </Link>
@@ -130,7 +123,7 @@ export default function Support() {
           <CardHeader className="pb-2">
             <CardTitle className="text-base flex items-center gap-2">
               <HelpCircle className="h-5 w-5" />
-              Frequently Asked Questions
+              {t("faq")}
             </CardTitle>
           </CardHeader>
           <CardContent className="p-0">
@@ -152,39 +145,39 @@ export default function Support() {
         {/* Feedback Form */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Send Feedback</CardTitle>
+            <CardTitle className="text-base">{t("sendFeedback")}</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmitFeedback} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="feedbackType">Type</Label>
+                <Label htmlFor="feedbackType">{t("feedbackType")}</Label>
                 <Select value={feedbackType} onValueChange={setFeedbackType}>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select feedback type" />
+                    <SelectValue placeholder={t("selectFeedbackType")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="bug">Bug Report</SelectItem>
-                    <SelectItem value="feature">Feature Request</SelectItem>
-                    <SelectItem value="general">General Feedback</SelectItem>
-                    <SelectItem value="complaint">Complaint</SelectItem>
+                    <SelectItem value="bug">{t("bugReport")}</SelectItem>
+                    <SelectItem value="feature">{t("featureRequest")}</SelectItem>
+                    <SelectItem value="general">{t("generalFeedback")}</SelectItem>
+                    <SelectItem value="complaint">{t("complaint")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="message">Message</Label>
+                <Label htmlFor="message">{t("message")}</Label>
                 <Textarea
                   id="message"
                   value={feedbackMessage}
                   onChange={(e) => setFeedbackMessage(e.target.value)}
-                  placeholder="Tell us what's on your mind..."
+                  placeholder={t("tellUsWhatsOnMind")}
                   rows={4}
                 />
               </div>
 
               <Button type="submit" className="w-full" disabled={isSubmitting}>
                 <Send className="h-4 w-4 mr-2" />
-                {isSubmitting ? "Sending..." : "Send Feedback"}
+                {isSubmitting ? t("sendingFeedback") : t("sendFeedbackBtn")}
               </Button>
             </form>
           </CardContent>
@@ -198,9 +191,9 @@ export default function Support() {
                 <AlertTriangle className="h-5 w-5 text-destructive" />
               </div>
               <div className="flex-1">
-                <p className="font-medium">Report Abuse</p>
+                <p className="font-medium">{t("reportAbuse")}</p>
                 <p className="text-sm text-muted-foreground">
-                  Report suspicious activity or harassment
+                  {t("reportSuspiciousActivity")}
                 </p>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />

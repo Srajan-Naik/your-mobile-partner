@@ -7,23 +7,25 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useTransactions, useUserBalance, Transaction } from "@/hooks/use-transactions";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
 export default function Rewards() {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const { data: balance, isLoading: balanceLoading } = useUserBalance();
   const { data: transactions, isLoading: txLoading } = useTransactions();
 
   const isDriver = user?.userType === "driver";
 
   const receivedTips = transactions?.filter(
-    (t) => t.to_user_id === user?.id && t.type === "tip"
+    (tx) => tx.to_user_id === user?.id && tx.type === "tip"
   ) || [];
 
   const sentTips = transactions?.filter(
-    (t) => t.from_user_id === user?.id && t.type === "tip"
+    (tx) => tx.from_user_id === user?.id && tx.type === "tip"
   ) || [];
 
   return (
@@ -33,7 +35,7 @@ export default function Rewards() {
       onLogout={signOut}
     >
       <div className="p-4 space-y-6">
-        <h1 className="font-heading text-2xl font-bold">Rewards & Tips</h1>
+        <h1 className="font-heading text-2xl font-bold">{t("rewards")}</h1>
 
         {/* Balance Card */}
         <Card className="gradient-primary text-primary-foreground">
@@ -44,7 +46,7 @@ export default function Rewards() {
               </div>
               <div>
                 <p className="text-sm opacity-80">
-                  {isDriver ? "Total Earnings" : "Tips Sent"}
+                  {isDriver ? t("totalEarnings") : t("tipsSent")}
                 </p>
                 {balanceLoading ? (
                   <LoadingSkeleton className="h-8 w-24 bg-white/20" />
@@ -58,7 +60,7 @@ export default function Rewards() {
 
             {isDriver && (
               <Button variant="secondary" className="w-full">
-                Withdraw Funds
+                {t("withdrawFunds")}
               </Button>
             )}
           </CardContent>
@@ -70,14 +72,14 @@ export default function Rewards() {
             <CardContent className="p-4 text-center">
               <Gift className="h-6 w-6 text-success mx-auto mb-2" />
               <p className="text-xl font-bold">{receivedTips.length}</p>
-              <p className="text-xs text-muted-foreground">Tips Received</p>
+              <p className="text-xs text-muted-foreground">{t("tipsReceived")}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
               <History className="h-6 w-6 text-primary mx-auto mb-2" />
               <p className="text-xl font-bold">{transactions?.length || 0}</p>
-              <p className="text-xs text-muted-foreground">Total Transactions</p>
+              <p className="text-xs text-muted-foreground">{t("totalTransactions")}</p>
             </CardContent>
           </Card>
         </div>
@@ -85,14 +87,14 @@ export default function Rewards() {
         {/* Transaction History */}
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-base">Transaction History</CardTitle>
+            <CardTitle className="text-base">{t("transactionHistory")}</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
             <Tabs defaultValue="all">
               <TabsList className="w-full justify-start px-4 pt-2">
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="received">Received</TabsTrigger>
-                <TabsTrigger value="sent">Sent</TabsTrigger>
+                <TabsTrigger value="all">{t("all")}</TabsTrigger>
+                <TabsTrigger value="received">{t("received")}</TabsTrigger>
+                <TabsTrigger value="sent">{t("sent")}</TabsTrigger>
               </TabsList>
 
               <TabsContent value="all" className="mt-0">
@@ -100,6 +102,7 @@ export default function Rewards() {
                   transactions={transactions || []}
                   isLoading={txLoading}
                   userId={user?.id}
+                  t={t}
                 />
               </TabsContent>
 
@@ -108,6 +111,7 @@ export default function Rewards() {
                   transactions={receivedTips}
                   isLoading={txLoading}
                   userId={user?.id}
+                  t={t}
                 />
               </TabsContent>
 
@@ -116,6 +120,7 @@ export default function Rewards() {
                   transactions={sentTips}
                   isLoading={txLoading}
                   userId={user?.id}
+                  t={t}
                 />
               </TabsContent>
             </Tabs>
@@ -130,10 +135,12 @@ function TransactionList({
   transactions,
   isLoading,
   userId,
+  t,
 }: {
   transactions: Transaction[];
   isLoading: boolean;
   userId: string | undefined;
+  t: (key: string) => string;
 }) {
   if (isLoading) {
     return (
@@ -149,7 +156,7 @@ function TransactionList({
     return (
       <div className="p-8 text-center">
         <History className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-        <p className="text-sm text-muted-foreground">No transactions yet</p>
+        <p className="text-sm text-muted-foreground">{t("noTransactionsYet")}</p>
       </div>
     );
   }
@@ -175,7 +182,7 @@ function TransactionList({
 
             <div className="flex-1 min-w-0">
               <p className="font-medium">
-                {isReceived ? "Tip Received" : "Tip Sent"}
+                {isReceived ? t("tipReceived") : t("tipSent")}
               </p>
               <p className="text-sm text-muted-foreground">
                 {format(new Date(tx.created_at), "MMM d, yyyy • h:mm a")}

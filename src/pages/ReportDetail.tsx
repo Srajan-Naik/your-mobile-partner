@@ -19,7 +19,6 @@ import { Layout } from "@/components/layout/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import {
   AlertDialog,
@@ -33,6 +32,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useLostItem, useDeleteLostItem, getImageUrl, ITEM_CATEGORIES, STATUS_CONFIG } from "@/hooks/use-lost-items";
 import { cn } from "@/lib/utils";
 
@@ -40,6 +40,7 @@ export default function ReportDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const { data: report, isLoading, error } = useLostItem(id);
@@ -69,12 +70,12 @@ export default function ReportDetail() {
     return (
       <Layout userType="passenger" userName={user?.name || "Passenger"} onLogout={signOut}>
         <div className="flex flex-col items-center justify-center h-full text-center p-4">
-          <p className="text-lg font-medium">Report not found</p>
+          <p className="text-lg font-medium">{t("reportNotFound")}</p>
           <p className="text-sm text-muted-foreground mt-1">
-            The report you're looking for doesn't exist or has been deleted.
+            {t("reportNotFoundDesc")}
           </p>
           <Button asChild className="mt-4">
-            <Link to="/my-reports">Back to Reports</Link>
+            <Link to="/my-reports">{t("backToReports")}</Link>
           </Button>
         </div>
       </Layout>
@@ -110,7 +111,7 @@ export default function ReportDetail() {
             <div className="relative aspect-video bg-muted">
               <img
                 src={getImageUrl(report.images[currentImageIndex].storage_path)}
-                alt={`${report.title} - Image ${currentImageIndex + 1}`}
+                alt={report.title}
                 className="w-full h-full object-contain"
               />
               {report.images.length > 1 && (
@@ -160,17 +161,17 @@ export default function ReportDetail() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <span className="text-xl">{categoryInfo.icon}</span>
-                  Item Details
+                  {t("itemDetailsTitle")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <p className="text-sm text-muted-foreground">Category</p>
+                  <p className="text-sm text-muted-foreground">{t("category")}</p>
                   <p className="font-medium">{categoryInfo.label}</p>
                 </div>
                 {report.description && (
                   <div>
-                    <p className="text-sm text-muted-foreground">Description</p>
+                    <p className="text-sm text-muted-foreground">{t("description")}</p>
                     <p className="whitespace-pre-wrap">{report.description}</p>
                   </div>
                 )}
@@ -182,14 +183,14 @@ export default function ReportDetail() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Calendar className="h-5 w-5" />
-                  When & Where
+                  {t("whenAndWhere")}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex items-start gap-3">
                   <Calendar className="h-4 w-4 mt-0.5 text-muted-foreground" />
                   <div>
-                    <p className="text-sm text-muted-foreground">Lost Date</p>
+                    <p className="text-sm text-muted-foreground">{t("lostDate")}</p>
                     <p className="font-medium">
                       {format(new Date(report.lost_date), "EEEE, MMMM d, yyyy")}
                     </p>
@@ -199,7 +200,7 @@ export default function ReportDetail() {
                   <div className="flex items-start gap-3">
                     <MapPin className="h-4 w-4 mt-0.5 text-muted-foreground" />
                     <div>
-                      <p className="text-sm text-muted-foreground">Location</p>
+                      <p className="text-sm text-muted-foreground">{t("location")}</p>
                       <p className="font-medium">{report.lost_location_address}</p>
                     </div>
                   </div>
@@ -213,7 +214,7 @@ export default function ReportDetail() {
                 <CardHeader className="pb-3">
                   <CardTitle className="text-base flex items-center gap-2">
                     <Car className="h-5 w-5" />
-                    Auto Details
+                    {t("autoDetailsTitle")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
@@ -221,7 +222,7 @@ export default function ReportDetail() {
                     <div className="flex items-start gap-3">
                       <Car className="h-4 w-4 mt-0.5 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Registration Number</p>
+                        <p className="text-sm text-muted-foreground">{t("registrationNumber")}</p>
                         <p className="font-medium font-mono">{report.auto_number}</p>
                       </div>
                     </div>
@@ -230,7 +231,7 @@ export default function ReportDetail() {
                     <div className="flex items-start gap-3">
                       <Route className="h-4 w-4 mt-0.5 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Route</p>
+                        <p className="text-sm text-muted-foreground">{t("route")}</p>
                         <p>{report.route_description}</p>
                       </div>
                     </div>
@@ -239,7 +240,7 @@ export default function ReportDetail() {
                     <div className="flex items-start gap-3">
                       <User className="h-4 w-4 mt-0.5 text-muted-foreground" />
                       <div>
-                        <p className="text-sm text-muted-foreground">Driver Description</p>
+                        <p className="text-sm text-muted-foreground">{t("driverDescription")}</p>
                         <p>{report.driver_description}</p>
                       </div>
                     </div>
@@ -251,14 +252,14 @@ export default function ReportDetail() {
             {/* Status Timeline */}
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-base">Timeline</CardTitle>
+                <CardTitle className="text-base">{t("timeline")}</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
                   <div className="flex items-center gap-3">
                     <div className="h-2 w-2 rounded-full bg-primary" />
                     <div className="flex-1">
-                      <p className="text-sm font-medium">Report Created</p>
+                      <p className="text-sm font-medium">{t("reportCreated")}</p>
                       <p className="text-xs text-muted-foreground">
                         {format(new Date(report.created_at), "MMM d, yyyy 'at' h:mm a")}
                       </p>
@@ -268,9 +269,9 @@ export default function ReportDetail() {
                     <div className="flex items-center gap-3">
                       <div className="h-2 w-2 rounded-full bg-yellow-500" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium">Driver Matched</p>
+                        <p className="text-sm font-medium">{t("driverMatched")}</p>
                         <p className="text-xs text-muted-foreground">
-                          A driver has responded to your report
+                          {t("driverRespondedToReport")}
                         </p>
                       </div>
                     </div>
@@ -279,7 +280,7 @@ export default function ReportDetail() {
                     <div className="flex items-center gap-3">
                       <div className="h-2 w-2 rounded-full bg-success" />
                       <div className="flex-1">
-                        <p className="text-sm font-medium">Resolved</p>
+                        <p className="text-sm font-medium">{t("resolvedStatus")}</p>
                         <p className="text-xs text-muted-foreground">
                           {format(new Date(report.updated_at), "MMM d, yyyy 'at' h:mm a")}
                         </p>
@@ -294,20 +295,20 @@ export default function ReportDetail() {
             {report.status === "matched" && report.matched_driver_id && (
               <Card className="border-primary">
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-base text-primary">Driver Contact</CardTitle>
+                  <CardTitle className="text-base text-primary">{t("driverContact")}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-4">
-                    A driver has found your item! Contact them to arrange pickup.
+                    {t("driverFoundItem")}
                   </p>
                   <div className="flex gap-2">
                     <Button className="flex-1">
                       <MessageCircle className="h-4 w-4 mr-2" />
-                      Chat
+                      {t("chat")}
                     </Button>
                     <Button variant="outline" className="flex-1">
                       <Phone className="h-4 w-4 mr-2" />
-                      Call
+                      {t("call")}
                     </Button>
                   </div>
                 </CardContent>
@@ -323,31 +324,30 @@ export default function ReportDetail() {
               <Button variant="outline" asChild className="flex-1">
                 <Link to={`/report/${report.id}/edit`}>
                   <Edit className="h-4 w-4 mr-2" />
-                  Edit
+                  {t("edit")}
                 </Link>
               </Button>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
                   <Button variant="destructive" className="flex-1">
                     <Trash2 className="h-4 w-4 mr-2" />
-                    Delete
+                    {t("delete")}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Report?</AlertDialogTitle>
+                    <AlertDialogTitle>{t("deleteReport")}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. This will permanently delete your
-                      lost item report and all associated data.
+                      {t("deleteReportDesc")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDelete}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
-                      Delete
+                      {t("delete")}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

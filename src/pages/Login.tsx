@@ -4,6 +4,7 @@ import { Eye, EyeOff, Phone } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -21,6 +22,7 @@ import { toast } from "sonner";
 export default function Login() {
   const navigate = useNavigate();
   const { signIn, isLoading, user } = useAuth();
+  const { t } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginFormData>({
@@ -40,7 +42,7 @@ export default function Login() {
       return;
     }
 
-    toast.success("Welcome back!");
+    toast.success(t("welcomeBack") + "!");
     // Navigation will be handled by auth state change
   };
 
@@ -63,8 +65,8 @@ export default function Login() {
             <circle cx="12" cy="16" r="1" fill="currentColor" />
           </svg>
         </div>
-        <h1 className="font-heading text-2xl font-bold">Welcome back</h1>
-        <p className="text-muted-foreground mt-1">Sign in to your account</p>
+        <h1 className="font-heading text-2xl font-bold">{t("welcomeBackTitle")}</h1>
+        <p className="text-muted-foreground mt-1">{t("signInToAccount")}</p>
       </div>
 
       {/* Form */}
@@ -75,7 +77,7 @@ export default function Login() {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone Number *</FormLabel>
+                <FormLabel>{t("phoneNumber")} *</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -97,7 +99,7 @@ export default function Login() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password *</FormLabel>
+                <FormLabel>{t("password")} *</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
@@ -126,7 +128,7 @@ export default function Login() {
               to="/forgot-password"
               className="text-sm font-medium text-primary hover:underline"
             >
-              Forgot password?
+              {t("forgotPassword")}
             </Link>
           </div>
 
@@ -135,7 +137,7 @@ export default function Login() {
             className="w-full h-12 text-base font-medium"
             disabled={isLoading}
           >
-            {isLoading ? <LoadingSpinner size="sm" /> : "Sign In"}
+            {isLoading ? <LoadingSpinner size="sm" /> : t("signIn")}
           </Button>
 
           <div className="relative my-6">
@@ -143,7 +145,7 @@ export default function Login() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-background px-2 text-muted-foreground">{t("orContinueWith")}</span>
             </div>
           </div>
 
@@ -171,7 +173,7 @@ export default function Login() {
                 fill="#EA4335"
               />
             </svg>
-            Continue with Google
+            {t("continueWithGoogle")}
           </Button>
         </form>
       </Form>
@@ -179,9 +181,9 @@ export default function Login() {
       {/* Footer */}
       <div className="p-6 text-center">
         <p className="text-sm text-muted-foreground">
-          Don't have an account?{" "}
+          {t("dontHaveAccount")}{" "}
           <Link to="/signup" className="font-medium text-primary hover:underline">
-            Sign up
+            {t("signUp")}
           </Link>
         </p>
       </div>

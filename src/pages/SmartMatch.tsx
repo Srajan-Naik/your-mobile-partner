@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useSmartMatching, getConfidenceLabel, type MatchResult } from "@/hooks/use-smart-matching";
 import { useCreateConversation } from "@/hooks/use-conversations";
 import { ITEM_CATEGORIES } from "@/hooks/use-lost-items";
@@ -17,6 +18,7 @@ import { cn } from "@/lib/utils";
 
 export default function SmartMatch() {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [description, setDescription] = useState("");
   const [autoNumber, setAutoNumber] = useState("");
@@ -59,9 +61,9 @@ export default function SmartMatch() {
             <Sparkles className="h-6 w-6 text-primary" />
           </div>
           <div>
-            <h1 className="font-heading text-xl font-bold">Smart Match</h1>
+            <h1 className="font-heading text-xl font-bold">{t("smartMatchTitle")}</h1>
             <p className="text-sm text-muted-foreground">
-              Describe the item you found to find potential matches
+              {t("describeFoundItem")}
             </p>
           </div>
         </div>
@@ -70,10 +72,10 @@ export default function SmartMatch() {
         <Card>
           <CardContent className="p-4 space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="description">Item Description *</Label>
+              <Label htmlFor="description">{t("itemDescriptionRequired")}</Label>
               <Textarea
                 id="description"
-                placeholder="Describe the item you found in detail... (e.g., black leather wallet with red stitching, contains some cards)"
+                placeholder={t("describeFoundItemPlaceholder")}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className="min-h-[100px]"
@@ -82,7 +84,7 @@ export default function SmartMatch() {
 
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label htmlFor="autoNumber">Auto Number (if known)</Label>
+                <Label htmlFor="autoNumber">{t("autoNumberIfKnown")}</Label>
                 <Input
                   id="autoNumber"
                   placeholder="e.g., KA01AB1234"
@@ -91,7 +93,7 @@ export default function SmartMatch() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="foundDate">When Found</Label>
+                <Label htmlFor="foundDate">{t("whenFound")}</Label>
                 <Input
                   id="foundDate"
                   type="date"
@@ -109,12 +111,12 @@ export default function SmartMatch() {
               {smartMatch.isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  Searching...
+                  {t("searching")}
                 </>
               ) : (
                 <>
                   <Search className="h-4 w-4 mr-2" />
-                  Find Matches
+                  {t("findMatches")}
                 </>
               )}
             </Button>
@@ -127,26 +129,25 @@ export default function SmartMatch() {
             <div className="flex items-center justify-between">
               <h2 className="font-semibold">
                 {smartMatch.data.matches_found > 0
-                  ? `Found ${smartMatch.data.matches_found} Potential Match${smartMatch.data.matches_found > 1 ? "es" : ""}`
-                  : "No Matches Found"}
+                  ? `${smartMatch.data.matches_found} ${smartMatch.data.matches_found > 1 ? t("potentialMatches") : t("potentialMatch")}`
+                  : t("noMatchesFound")}
               </h2>
               <Badge variant="secondary">
-                {smartMatch.data.total_items_analyzed} reports analyzed
+                {smartMatch.data.total_items_analyzed} {t("reportsAnalyzed")}
               </Badge>
             </div>
 
             {smartMatch.data.matches_found === 0 ? (
               <Card className="p-6 text-center">
                 <p className="text-muted-foreground">
-                  No matching lost item reports found. Try being more specific in your description
-                  or check back later for new reports.
+                  {t("noMatchingReports")}
                 </p>
                 <Button
                   variant="outline"
                   className="mt-4"
                   onClick={() => navigate("/driver/reports")}
                 >
-                  Browse All Reports
+                  {t("browseAllReports")}
                 </Button>
               </Card>
             ) : (
@@ -174,7 +175,7 @@ export default function SmartMatch() {
                               </Badge>
                             </div>
                             <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-                              {match.item.description || "No description provided"}
+                              {match.item.description || t("noDescriptionProvided")}
                             </p>
                             <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                               <span className="flex items-center gap-1">
@@ -194,7 +195,7 @@ export default function SmartMatch() {
                         {/* Match Reasons */}
                         <div className="mt-3 pt-3 border-t space-y-2">
                           <p className="text-xs font-medium text-muted-foreground">
-                            Why this might be a match:
+                            {t("whyMatch")}
                           </p>
                           <div className="flex flex-wrap gap-1">
                             {match.match_reasons.map((reason, idx) => (
@@ -220,7 +221,7 @@ export default function SmartMatch() {
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : (
                             <>
-                              Respond to Owner
+                              {t("respondToOwner")}
                               <ChevronRight className="h-4 w-4 ml-1" />
                             </>
                           )}

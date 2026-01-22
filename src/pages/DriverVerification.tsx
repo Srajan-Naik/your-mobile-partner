@@ -20,6 +20,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   useDriverVerification,
   useCreateOrUpdateDriverVerification,
@@ -30,15 +31,10 @@ import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
-const VERIFICATION_STEPS = [
-  { id: "license", label: "Driver's License", description: "Upload a clear photo of your license" },
-  { id: "vehicle", label: "Vehicle Registration", description: "Upload your vehicle registration document" },
-  { id: "photo", label: "Photo Verification", description: "Take a selfie for identity verification" },
-];
-
 export default function DriverVerification() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const { data: verification, isLoading } = useDriverVerification();
   const updateVerification = useCreateOrUpdateDriverVerification();
   const submitVerification = useSubmitVerification();
@@ -47,29 +43,16 @@ export default function DriverVerification() {
   const [licenseNumber, setLicenseNumber] = useState(verification?.license_number || "");
   const [vehicleNumber, setVehicleNumber] = useState(verification?.vehicle_registration_number || "");
 
-  const getStatusIcon = (status: string | undefined) => {
-    switch (status) {
-      case "approved":
-        return <Check className="h-5 w-5 text-success" />;
-      case "submitted":
-        return <Clock className="h-5 w-5 text-primary" />;
-      case "rejected":
-        return <X className="h-5 w-5 text-destructive" />;
-      default:
-        return <AlertCircle className="h-5 w-5 text-muted-foreground" />;
-    }
-  };
-
   const getStatusBadge = () => {
     switch (verification?.status) {
       case "approved":
-        return <Badge className="bg-success">Verified</Badge>;
+        return <Badge className="bg-success">{t("verified")}</Badge>;
       case "submitted":
-        return <Badge variant="secondary">Under Review</Badge>;
+        return <Badge variant="secondary">{t("underReview")}</Badge>;
       case "rejected":
-        return <Badge variant="destructive">Rejected</Badge>;
+        return <Badge variant="destructive">{t("rejected")}</Badge>;
       default:
-        return <Badge variant="outline">Pending</Badge>;
+        return <Badge variant="outline">{t("notVerified")}</Badge>;
     }
   };
 
@@ -97,7 +80,7 @@ export default function DriverVerification() {
       }
 
       await updateVerification.mutateAsync(updateData);
-      toast.success("Document uploaded successfully");
+      toast.success(t("success"));
     } catch (error) {
       console.error(error);
     }
@@ -105,7 +88,7 @@ export default function DriverVerification() {
 
   const handleSubmit = async () => {
     if (calculateProgress() < 100) {
-      toast.error("Please upload all required documents");
+      toast.error(t("uploadAllDocuments"));
       return;
     }
 
@@ -175,8 +158,8 @@ export default function DriverVerification() {
             )}
             <p className="text-sm text-muted-foreground">
               {isUploaded
-                ? "Document uploaded. Tap to replace."
-                : "Tap to upload or drag and drop"}
+                ? t("documentUploaded")
+                : t("tapToUpload")}
             </p>
           </div>
         </CardContent>
@@ -203,7 +186,7 @@ export default function DriverVerification() {
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1">
-            <h1 className="font-heading text-xl font-bold">Verification</h1>
+            <h1 className="font-heading text-xl font-bold">{t("verification")}</h1>
           </div>
           {getStatusBadge()}
         </div>
@@ -212,7 +195,7 @@ export default function DriverVerification() {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium">Verification Progress</p>
+              <p className="text-sm font-medium">{t("verificationProgress")}</p>
               <p className="text-sm text-muted-foreground">
                 {Math.round(calculateProgress())}%
               </p>
@@ -233,7 +216,7 @@ export default function DriverVerification() {
           <Alert>
             <Clock className="h-4 w-4" />
             <AlertDescription>
-              Your documents are being reviewed. This usually takes 1-2 business days.
+              {t("documentsBeingReviewed")}
             </AlertDescription>
           </Alert>
         )}
@@ -242,7 +225,7 @@ export default function DriverVerification() {
           <Alert className="border-success/50 bg-success/10">
             <Check className="h-4 w-4 text-success" />
             <AlertDescription className="text-success">
-              Congratulations! Your verification is complete.
+              {t("congratsVerified")}
             </AlertDescription>
           </Alert>
         )}
@@ -251,25 +234,25 @@ export default function DriverVerification() {
         {verification?.status !== "approved" && verification?.status !== "submitted" && (
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle className="text-base">License Details</CardTitle>
+              <CardTitle className="text-base">{t("licenseDetails")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="licenseNumber">License Number</Label>
+                <Label htmlFor="licenseNumber">{t("licenseNumber")}</Label>
                 <Input
                   id="licenseNumber"
                   value={licenseNumber}
                   onChange={(e) => setLicenseNumber(e.target.value)}
-                  placeholder="Enter your license number"
+                  placeholder={t("enterLicenseNumber")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="vehicleNumber">Vehicle Registration Number</Label>
+                <Label htmlFor="vehicleNumber">{t("vehicleRegNumber")}</Label>
                 <Input
                   id="vehicleNumber"
                   value={vehicleNumber}
                   onChange={(e) => setVehicleNumber(e.target.value)}
-                  placeholder="Enter vehicle registration"
+                  placeholder={t("enterVehicleReg")}
                 />
               </div>
             </CardContent>
@@ -278,26 +261,26 @@ export default function DriverVerification() {
 
         {/* Document Uploads */}
         <div className="space-y-3">
-          <h2 className="font-medium">Required Documents</h2>
+          <h2 className="font-medium">{t("requiredDocuments")}</h2>
 
           <DocumentUploader
             documentType="license"
-            label="Driver's License"
-            description="Clear photo of your valid driver's license"
+            label={t("driversLicense")}
+            description={t("clearLicensePhoto")}
             storagePath={verification?.license_storage_path}
           />
 
           <DocumentUploader
             documentType="vehicle_registration"
-            label="Vehicle Registration"
-            description="Photo of your auto-rickshaw registration"
+            label={t("vehicleRegistration")}
+            description={t("autoRegistrationPhoto")}
             storagePath={verification?.vehicle_registration_storage_path}
           />
 
           <DocumentUploader
             documentType="photo"
-            label="Photo Verification"
-            description="A clear selfie for identity verification"
+            label={t("photoVerification")}
+            description={t("clearSelfie")}
             storagePath={verification?.photo_verification_storage_path}
           />
         </div>
@@ -312,7 +295,7 @@ export default function DriverVerification() {
             {submitVerification.isPending && (
               <Loader2 className="h-4 w-4 mr-2 animate-spin" />
             )}
-            Submit for Verification
+            {t("submitForVerification")}
           </Button>
         )}
       </div>

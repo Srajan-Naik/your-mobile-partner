@@ -4,6 +4,7 @@ import { Eye, EyeOff, Phone, Check } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
@@ -30,6 +31,7 @@ type UserType = "passenger" | "driver";
 export default function Signup() {
   const navigate = useNavigate();
   const { signUp, isLoading } = useAuth();
+  const { t } = useLanguage();
   const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<SignupFormData>({
@@ -57,7 +59,7 @@ export default function Signup() {
       return;
     }
 
-    toast.success("Account created! Please verify your phone number.");
+    toast.success(t("success") + "!");
     navigate("/verify-phone");
   };
 
@@ -80,8 +82,8 @@ export default function Signup() {
             <circle cx="12" cy="16" r="1" fill="currentColor" />
           </svg>
         </div>
-        <h1 className="font-heading text-2xl font-bold">Create account</h1>
-        <p className="text-muted-foreground mt-1 text-sm">Join AutoConnect today</p>
+        <h1 className="font-heading text-2xl font-bold">{t("createAccount")}</h1>
+        <p className="text-muted-foreground mt-1 text-sm">{t("joinAutoConnect")}</p>
       </div>
 
       {/* User Type Toggle */}
@@ -99,7 +101,7 @@ export default function Signup() {
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              {type === "passenger" ? "I'm a Passenger" : "I'm a Driver"}
+              {type === "passenger" ? t("imPassenger") : t("imDriver")}
             </button>
           ))}
         </div>
@@ -113,7 +115,7 @@ export default function Signup() {
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone Number *</FormLabel>
+                <FormLabel>{t("phoneNumber")} *</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Phone className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -135,12 +137,12 @@ export default function Signup() {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password *</FormLabel>
+                <FormLabel>{t("password")} *</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Create a password"
+                      placeholder={t("createPassword")}
                       className="pr-10"
                       {...field}
                     />
@@ -195,12 +197,12 @@ export default function Signup() {
             name="confirmPassword"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Confirm Password *</FormLabel>
+                <FormLabel>{t("confirmPassword")} *</FormLabel>
                 <FormControl>
                   <div className="relative">
                     <Input
                       type={showPassword ? "text" : "password"}
-                      placeholder="Confirm your password"
+                      placeholder={t("confirmYourPassword")}
                       className="pr-10"
                       {...field}
                     />
@@ -227,13 +229,13 @@ export default function Signup() {
                     />
                   </FormControl>
                   <label className="text-sm leading-tight text-muted-foreground">
-                    I agree to the{" "}
+                    {t("agreeToTerms")}{" "}
                     <Link to="/terms" className="text-primary hover:underline">
-                      Terms of Service
+                      {t("termsOfService")}
                     </Link>{" "}
-                    and{" "}
+                    {t("and")}{" "}
                     <Link to="/privacy" className="text-primary hover:underline">
-                      Privacy Policy
+                      {t("privacyPolicy")}
                     </Link>
                   </label>
                 </div>
@@ -247,7 +249,7 @@ export default function Signup() {
             className="w-full h-12 text-base font-medium"
             disabled={isLoading}
           >
-            {isLoading ? <LoadingSpinner size="sm" /> : "Create Account"}
+            {isLoading ? <LoadingSpinner size="sm" /> : t("createAccountBtn")}
           </Button>
         </form>
       </Form>
@@ -255,9 +257,9 @@ export default function Signup() {
       {/* Footer */}
       <div className="p-6 text-center">
         <p className="text-sm text-muted-foreground">
-          Already have an account?{" "}
+          {t("alreadyHaveAccount")}{" "}
           <Link to="/login" className="font-medium text-primary hover:underline">
-            Sign in
+            {t("signIn")}
           </Link>
         </p>
       </div>

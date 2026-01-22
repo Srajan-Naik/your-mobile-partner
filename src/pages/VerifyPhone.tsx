@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import {
@@ -18,6 +19,7 @@ const RESEND_COOLDOWN = 30;
 export default function VerifyPhone() {
   const navigate = useNavigate();
   const { verifyOtp, resendOtp, pendingPhone, user, isLoading, profile } = useAuth();
+  const { t } = useLanguage();
 
   const [otp, setOtp] = useState("");
   const [resendTimer, setResendTimer] = useState(RESEND_COOLDOWN);
@@ -58,12 +60,12 @@ export default function VerifyPhone() {
   // Verify OTP
   const handleVerify = async (code: string) => {
     if (code.length !== OTP_LENGTH) {
-      toast.error("Please enter the complete verification code");
+      toast.error(t("error"));
       return;
     }
 
     if (!phone) {
-      toast.error("Phone number not found. Please try signing up again.");
+      toast.error(t("error"));
       navigate("/signup");
       return;
     }
@@ -74,18 +76,18 @@ export default function VerifyPhone() {
       const { error, success } = await verifyOtp(phone, code);
 
       if (success) {
-        toast.success("Phone verified successfully!");
+        toast.success(t("success") + "!");
         const redirectPath =
           profile?.user_type === "driver"
             ? "/driver/verification"
             : "/passenger/dashboard";
         navigate(redirectPath, { replace: true });
       } else {
-        toast.error(error || "Invalid verification code. Please try again.");
+        toast.error(error || t("error"));
         setOtp("");
       }
     } catch (err) {
-      toast.error("Verification failed. Please try again.");
+      toast.error(t("error"));
       setOtp("");
     } finally {
       setIsVerifying(false);
@@ -95,7 +97,7 @@ export default function VerifyPhone() {
   // Resend OTP
   const handleResend = async () => {
     if (!phone) {
-      toast.error("Phone number not found.");
+      toast.error(t("error"));
       return;
     }
 
@@ -107,12 +109,12 @@ export default function VerifyPhone() {
       if (error) {
         toast.error(error);
       } else {
-        toast.success("Verification code sent!");
+        toast.success(t("success") + "!");
         setResendTimer(RESEND_COOLDOWN);
         setOtp("");
       }
     } catch (err) {
-      toast.error("Failed to resend code. Please try again.");
+      toast.error(t("error"));
     } finally {
       setIsResending(false);
     }
@@ -135,7 +137,7 @@ export default function VerifyPhone() {
         >
           <ArrowLeft className="h-5 w-5" />
         </Button>
-        <h1 className="font-heading text-lg font-semibold">Verify Phone</h1>
+        <h1 className="font-heading text-lg font-semibold">{t("verifyPhone")}</h1>
       </header>
 
       {/* Content */}
@@ -156,12 +158,12 @@ export default function VerifyPhone() {
             </svg>
           </div>
           <h2 className="font-heading text-xl font-semibold mb-2">
-            Enter verification code
+            {t("enterVerificationCode")}
           </h2>
           <p className="text-sm text-muted-foreground">
-            We've sent a 6-digit code to{" "}
+            {t("weSentCode")}{" "}
             <span className="font-medium text-foreground">
-              {phone ? formatPhoneDisplay(phone) : "your phone"}
+              {phone ? formatPhoneDisplay(phone) : t("yourPhone")}
             </span>
           </p>
         </div>
@@ -192,7 +194,7 @@ export default function VerifyPhone() {
             className="w-full h-12 text-base font-medium"
             disabled={isVerifying || isLoading || otp.length !== OTP_LENGTH}
           >
-            {isVerifying ? <LoadingSpinner size="sm" /> : "Verify"}
+            {isVerifying ? <LoadingSpinner size="sm" /> : t("verify")}
           </Button>
         </form>
 
@@ -200,7 +202,7 @@ export default function VerifyPhone() {
         <div className="mt-6 text-center">
           {resendTimer > 0 ? (
             <p className="text-sm text-muted-foreground">
-              Resend code in{" "}
+              {t("resendCodeIn")}{" "}
               <span className="font-medium text-foreground">{resendTimer}s</span>
             </p>
           ) : (
@@ -210,14 +212,14 @@ export default function VerifyPhone() {
               disabled={isResending}
               className="text-sm font-medium text-primary hover:underline disabled:opacity-50"
             >
-              {isResending ? "Sending..." : "Resend verification code"}
+              {isResending ? t("sending") : t("resendVerificationCode")}
             </button>
           )}
         </div>
 
         {/* Info for users */}
         <div className="mt-8 p-4 bg-muted rounded-lg text-xs text-muted-foreground text-center">
-          <p>Didn't receive the code? Check your SMS inbox or try resending.</p>
+          <p>{t("didntReceiveCode")}</p>
         </div>
       </div>
     </div>
