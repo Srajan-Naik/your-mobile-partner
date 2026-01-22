@@ -610,6 +610,10 @@ export type Database = {
         Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
+      mark_messages_read: {
+        Args: { _conversation_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "user" | "driver" | "admin"
