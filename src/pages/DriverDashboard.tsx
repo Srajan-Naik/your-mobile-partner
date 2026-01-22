@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   useDriverStatus,
   useToggleDriverStatus,
@@ -16,6 +17,7 @@ import { useUserBalance } from "@/hooks/use-transactions";
 
 export default function DriverDashboard() {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const { data: status, isLoading: statusLoading } = useDriverStatus();
   const toggleStatus = useToggleDriverStatus();
   const { data: rating } = useUserAverageRating(user?.id);
@@ -38,9 +40,9 @@ export default function DriverDashboard() {
         {/* Header with Online Toggle */}
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="font-heading text-2xl font-bold">Driver Dashboard</h1>
+            <h1 className="font-heading text-2xl font-bold">{t("driverDashboard")}</h1>
             <Badge variant={isOnline ? "default" : "secondary"} className="mt-1">
-              {isOnline ? "Online" : "Offline"}
+              {isOnline ? t("online") : t("offline")}
             </Badge>
           </div>
           <Button
@@ -69,7 +71,7 @@ export default function DriverDashboard() {
               </div>
               <div>
                 <p className="text-2xl font-bold">₹{balance?.toLocaleString() ?? 0}</p>
-                <p className="text-xs text-muted-foreground">Total Earnings</p>
+                <p className="text-xs text-muted-foreground">{t("totalEarnings")}</p>
               </div>
             </CardContent>
           </Card>
@@ -83,7 +85,7 @@ export default function DriverDashboard() {
                   {rating?.average?.toFixed(1) ?? "N/A"}
                 </p>
                 <p className="text-xs text-muted-foreground">
-                  Rating ({rating?.count ?? 0} reviews)
+                  {t("rating")} ({rating?.count ?? 0} {t("reviews")})
                 </p>
               </div>
             </CardContent>
@@ -95,13 +97,13 @@ export default function DriverDashboard() {
           <Button asChild className="w-full h-14 text-base font-medium gap-2">
             <Link to="/driver/smart-match">
               <Sparkles className="h-5 w-5" />
-              Smart Match - Find Item Owner
+              {t("smartMatch")}
             </Link>
           </Button>
           <Button asChild variant="outline" className="w-full h-14 text-base font-medium gap-2">
             <Link to="/driver/reports">
               <FileSearch className="h-5 w-5" />
-              Browse Lost Item Reports
+              {t("browseLostItems")}
             </Link>
           </Button>
         </div>

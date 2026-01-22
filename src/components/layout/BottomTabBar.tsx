@@ -1,25 +1,26 @@
 import { Home, FileText, MessageCircle, User } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 interface TabItem {
   icon: React.ComponentType<{ className?: string }>;
-  label: string;
+  labelKey: string;
   path: string;
 }
 
 const passengerTabs: TabItem[] = [
-  { icon: Home, label: "Home", path: "/passenger/dashboard" },
-  { icon: FileText, label: "Reports", path: "/my-reports" },
-  { icon: MessageCircle, label: "Chat", path: "/chat" },
-  { icon: User, label: "Profile", path: "/profile" },
+  { icon: Home, labelKey: "home", path: "/passenger/dashboard" },
+  { icon: FileText, labelKey: "reports", path: "/my-reports" },
+  { icon: MessageCircle, labelKey: "chat", path: "/conversations" },
+  { icon: User, labelKey: "profile", path: "/profile" },
 ];
 
 const driverTabs: TabItem[] = [
-  { icon: Home, label: "Home", path: "/driver/dashboard" },
-  { icon: FileText, label: "Reports", path: "/driver/reports" },
-  { icon: MessageCircle, label: "Chat", path: "/chat" },
-  { icon: User, label: "Profile", path: "/profile" },
+  { icon: Home, labelKey: "home", path: "/driver/dashboard" },
+  { icon: FileText, labelKey: "reports", path: "/driver/reports" },
+  { icon: MessageCircle, labelKey: "chat", path: "/conversations" },
+  { icon: User, labelKey: "profile", path: "/profile" },
 ];
 
 interface BottomTabBarProps {
@@ -27,6 +28,7 @@ interface BottomTabBarProps {
 }
 
 export function BottomTabBar({ userType = "passenger" }: BottomTabBarProps) {
+  const { t } = useLanguage();
   const tabs = userType === "driver" ? driverTabs : passengerTabs;
 
   return (
@@ -45,7 +47,7 @@ export function BottomTabBar({ userType = "passenger" }: BottomTabBarProps) {
               <>
                 <tab.icon className={cn("h-5 w-5", isActive && "text-primary")} />
                 <span className={cn("text-xs font-medium", isActive && "text-primary")}>
-                  {tab.label}
+                  {t(tab.labelKey)}
                 </span>
               </>
             )}
