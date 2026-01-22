@@ -260,7 +260,30 @@ export default function Chat() {
           <Button variant="ghost" size="icon" className="shrink-0">
             <Image className="h-5 w-5" />
           </Button>
-          <Button variant="ghost" size="icon" className="shrink-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="shrink-0"
+            onClick={() => {
+              if (!navigator.geolocation) {
+                return;
+              }
+              navigator.geolocation.getCurrentPosition(
+                (position) => {
+                  if (!conversationId) return;
+                  sendMessage.mutate({
+                    conversationId,
+                    content: `${position.coords.latitude},${position.coords.longitude}`,
+                    messageType: "location",
+                  });
+                },
+                (error) => {
+                  console.error("Geolocation error:", error);
+                }
+              );
+            }}
+            title={t("shareLocation")}
+          >
             <MapPin className="h-5 w-5" />
           </Button>
           <Input
