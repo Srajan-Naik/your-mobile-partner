@@ -17,12 +17,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useUserAverageRating } from "@/hooks/use-reviews";
 import { useDriverVerification } from "@/hooks/use-driver-verification";
 import { useLostItems } from "@/hooks/use-lost-items";
 
 export default function Profile() {
   const { user, profile, signOut } = useAuth();
+  const { t } = useLanguage();
   const { data: rating } = useUserAverageRating(user?.id);
   const { data: verification } = useDriverVerification();
   const { data: reports } = useLostItems();
@@ -36,13 +38,13 @@ export default function Profile() {
     
     switch (verification?.status) {
       case "approved":
-        return <Badge className="bg-success">Verified</Badge>;
+        return <Badge className="bg-success">{t("verified")}</Badge>;
       case "submitted":
-        return <Badge variant="secondary">Under Review</Badge>;
+        return <Badge variant="secondary">{t("underReview")}</Badge>;
       case "rejected":
-        return <Badge variant="destructive">Rejected</Badge>;
+        return <Badge variant="destructive">{t("rejected")}</Badge>;
       default:
-        return <Badge variant="outline">Not Verified</Badge>;
+        return <Badge variant="outline">{t("notVerified")}</Badge>;
     }
   };
 
@@ -74,7 +76,7 @@ export default function Profile() {
 
                 <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">
                   <Badge variant="outline" className="text-xs">
-                    {isDriver ? "Driver" : "Passenger"}
+                    {isDriver ? t("driver") : t("passenger")}
                   </Badge>
                 </div>
 
@@ -83,7 +85,7 @@ export default function Profile() {
                     <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
                     <span className="font-medium">{rating.average.toFixed(1)}</span>
                     <span className="text-sm text-muted-foreground">
-                      ({rating.count} reviews)
+                      ({rating.count} {t("reviews")})
                     </span>
                   </div>
                 )}
@@ -104,14 +106,14 @@ export default function Profile() {
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold">{totalCount}</p>
               <p className="text-xs text-muted-foreground">
-                {isDriver ? "Items Returned" : "Reports Filed"}
+                {isDriver ? t("itemsReturned") : t("reportsFiled")}
               </p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold">{resolvedCount}</p>
-              <p className="text-xs text-muted-foreground">Resolved</p>
+              <p className="text-xs text-muted-foreground">{t("resolved")}</p>
             </CardContent>
           </Card>
         </div>
@@ -119,7 +121,7 @@ export default function Profile() {
         {/* Contact Info */}
         <Card>
           <CardContent className="p-4 space-y-4">
-            <h2 className="font-medium">Contact Information</h2>
+            <h2 className="font-medium">{t("contactInformation")}</h2>
 
             <div className="space-y-3">
               <div className="flex items-center gap-3">
@@ -127,8 +129,8 @@ export default function Profile() {
                   <Phone className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Phone</p>
-                  <p className="font-medium">{profile?.phone || user?.phone || "Not set"}</p>
+                  <p className="text-sm text-muted-foreground">{t("phone")}</p>
+                  <p className="font-medium">{profile?.phone || user?.phone || t("notSet")}</p>
                 </div>
               </div>
 
@@ -139,8 +141,8 @@ export default function Profile() {
                   <Mail className="h-4 w-4 text-muted-foreground" />
                 </div>
                 <div>
-                  <p className="text-sm text-muted-foreground">Email</p>
-                  <p className="font-medium">{user?.email || "Not set"}</p>
+                  <p className="text-sm text-muted-foreground">{t("email")}</p>
+                  <p className="font-medium">{user?.email || t("notSet")}</p>
                 </div>
               </div>
             </div>
@@ -160,7 +162,7 @@ export default function Profile() {
                     <div className="p-2 rounded-lg bg-primary/10">
                       <Shield className="h-4 w-4 text-primary" />
                     </div>
-                    <span className="font-medium">Verification Status</span>
+                    <span className="font-medium">{t("verificationStatus")}</span>
                   </div>
                   <ChevronRight className="h-5 w-5 text-muted-foreground" />
                 </Link>
@@ -177,7 +179,7 @@ export default function Profile() {
                   <FileText className="h-4 w-4 text-primary" />
                 </div>
                 <span className="font-medium">
-                  {isDriver ? "Available Reports" : "My Reports"}
+                  {isDriver ? t("availableReports") : t("myReports")}
                 </span>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
@@ -193,7 +195,7 @@ export default function Profile() {
                 <div className="p-2 rounded-lg bg-success/10">
                   <Award className="h-4 w-4 text-success" />
                 </div>
-                <span className="font-medium">Rewards & Tips</span>
+                <span className="font-medium">{t("rewardsAndTips")}</span>
               </div>
               <ChevronRight className="h-5 w-5 text-muted-foreground" />
             </Link>

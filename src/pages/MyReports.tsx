@@ -10,20 +10,22 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useLostItems, ITEM_CATEGORIES, STATUS_CONFIG, type ReportStatus } from "@/hooks/use-lost-items";
 import { cn } from "@/lib/utils";
 
-const STATUS_TABS: { value: ReportStatus | "all"; label: string; icon: React.ElementType }[] = [
-  { value: "all", label: "All", icon: Filter },
-  { value: "active", label: "Active", icon: Clock },
-  { value: "matched", label: "Matched", icon: AlertCircle },
-  { value: "resolved", label: "Resolved", icon: CheckCircle },
-];
-
 export default function MyReports() {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState<ReportStatus | "all">("all");
   const [searchQuery, setSearchQuery] = useState("");
+
+  const STATUS_TABS: { value: ReportStatus | "all"; label: string; icon: React.ElementType }[] = [
+    { value: "all", label: t("all"), icon: Filter },
+    { value: "active", label: t("active"), icon: Clock },
+    { value: "matched", label: t("matched"), icon: AlertCircle },
+    { value: "resolved", label: t("resolved"), icon: CheckCircle },
+  ];
 
   const { data: reports, isLoading, error } = useLostItems(
     activeTab === "all" ? undefined : activeTab
@@ -50,9 +52,9 @@ export default function MyReports() {
         {/* Header */}
         <div className="p-4 space-y-4 border-b">
           <div className="flex items-center justify-between">
-            <h1 className="font-heading text-xl font-bold">My Reports</h1>
+            <h1 className="font-heading text-xl font-bold">{t("myReports")}</h1>
             <Button asChild size="sm">
-              <Link to="/report-item">New Report</Link>
+              <Link to="/report-item">{t("newReport")}</Link>
             </Button>
           </div>
 
@@ -60,7 +62,7 @@ export default function MyReports() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
-              placeholder="Search reports..."
+              placeholder={t("searchReports")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -95,9 +97,9 @@ export default function MyReports() {
             ) : error ? (
               <div className="flex flex-col items-center justify-center py-12 text-center">
                 <XCircle className="h-12 w-12 text-destructive mb-4" />
-                <p className="text-muted-foreground">Failed to load reports</p>
+                <p className="text-muted-foreground">{t("failedToLoad")}</p>
                 <Button variant="outline" size="sm" className="mt-4" onClick={() => window.location.reload()}>
-                  Try Again
+                  {t("tryAgain")}
                 </Button>
               </div>
             ) : filteredReports?.length === 0 ? (
@@ -105,17 +107,17 @@ export default function MyReports() {
                 <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4">
                   <Search className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <p className="font-medium">No reports found</p>
+                <p className="font-medium">{t("noReportsFound")}</p>
                 <p className="text-sm text-muted-foreground mt-1">
                   {searchQuery
-                    ? "Try a different search term"
+                    ? t("tryDifferentSearch")
                     : activeTab === "all"
-                    ? "Start by reporting a lost item"
-                    : `No ${activeTab} reports`}
+                    ? t("startByReporting")
+                    : `${t("noReportsFound")}`}
                 </p>
                 {!searchQuery && activeTab === "all" && (
                   <Button asChild className="mt-4">
-                    <Link to="/report-item">Report Lost Item</Link>
+                    <Link to="/report-item">{t("reportLostItem")}</Link>
                   </Button>
                 )}
               </div>
@@ -146,14 +148,14 @@ export default function MyReports() {
                               </Badge>
                             </div>
                             <p className="text-sm text-muted-foreground line-clamp-1 mt-1">
-                              {report.description || "No description"}
+                              {report.description || t("noDescription")}
                             </p>
                             <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                               <span>
-                                Lost: {format(new Date(report.lost_date), "MMM d, yyyy")}
+                                {t("lost")}: {format(new Date(report.lost_date), "MMM d, yyyy")}
                               </span>
                               {report.auto_number && (
-                                <span>Auto: {report.auto_number}</span>
+                                <span>{t("auto")}: {report.auto_number}</span>
                               )}
                             </div>
                           </div>

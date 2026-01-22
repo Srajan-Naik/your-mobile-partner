@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useLostItems, ITEM_CATEGORIES } from "@/hooks/use-lost-items";
 import { useRealtimeNotifications, useRealtimeConversations } from "@/hooks/use-realtime";
 import { format } from "date-fns";
 
 export default function PassengerDashboard() {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const { data: allReports, isLoading } = useLostItems();
 
   // Enable real-time updates
@@ -27,8 +29,8 @@ export default function PassengerDashboard() {
   };
 
   const stats = [
-    { label: "Active Reports", value: activeCount, icon: Clock, color: "text-primary" },
-    { label: "Resolved", value: resolvedCount, icon: CheckCircle, color: "text-success" },
+    { label: t("activeReports"), value: activeCount, icon: Clock, color: "text-primary" },
+    { label: t("resolved"), value: resolvedCount, icon: CheckCircle, color: "text-success" },
   ];
 
   return (
@@ -37,16 +39,16 @@ export default function PassengerDashboard() {
         {/* Welcome */}
         <div>
           <h1 className="font-heading text-2xl font-bold">
-            Welcome back{user?.name ? `, ${user.name}` : ""}!
+            {t("welcomeBack")}{user?.name ? `, ${user.name}` : ""}!
           </h1>
-          <p className="text-muted-foreground mt-1">Lost something? We'll help you find it.</p>
+          <p className="text-muted-foreground mt-1">{t("lostSomething")}</p>
         </div>
 
         {/* Quick Action */}
         <Button asChild className="w-full h-14 text-base font-medium gap-2">
           <Link to="/report-item">
             <FileText className="h-5 w-5" />
-            Report Lost Item
+            {t("reportLostItem")}
           </Link>
         </Button>
 
@@ -78,9 +80,9 @@ export default function PassengerDashboard() {
         {recentReports.length > 0 && (
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h2 className="font-heading font-semibold">Recent Reports</h2>
+              <h2 className="font-heading font-semibold">{t("recentReports")}</h2>
               <Button variant="ghost" size="sm" asChild>
-                <Link to="/my-reports">View All</Link>
+                <Link to="/my-reports">{t("viewAll")}</Link>
               </Button>
             </div>
             <div className="space-y-2">
@@ -112,11 +114,11 @@ export default function PassengerDashboard() {
             <div className="flex items-center gap-3">
               <AlertTriangle className="h-5 w-5 text-destructive" />
               <div className="flex-1">
-                <p className="font-medium text-sm">Emergency Contacts</p>
-                <p className="text-xs text-muted-foreground">Quick access to help</p>
+                <p className="font-medium text-sm">{t("emergencyContacts")}</p>
+                <p className="text-xs text-muted-foreground">{t("quickAccessHelp")}</p>
               </div>
               <Button variant="outline" size="sm" asChild>
-                <Link to="/emergency">View</Link>
+                <Link to="/emergency">{t("view")}</Link>
               </Button>
             </div>
           </CardContent>
