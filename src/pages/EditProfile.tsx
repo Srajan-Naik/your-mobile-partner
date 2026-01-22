@@ -10,10 +10,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useGoBack } from "@/hooks/use-go-back";
 import { toast } from "sonner";
 
 export default function EditProfile() {
   const navigate = useNavigate();
+  const goBack = useGoBack("/profile");
   const { user, profile, updateProfile, signOut } = useAuth();
   const { t } = useLanguage();
 
@@ -55,7 +57,7 @@ export default function EditProfile() {
       <div className="p-4 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+          <Button variant="ghost" size="icon" onClick={goBack}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <h1 className="font-heading text-xl font-bold">{t("editProfile")}</h1>

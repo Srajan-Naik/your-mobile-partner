@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useGoBack } from "@/hooks/use-go-back";
 import { Button } from "@/components/ui/button";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import {
@@ -18,6 +19,7 @@ const RESEND_COOLDOWN = 30;
 
 export default function VerifyPhone() {
   const navigate = useNavigate();
+  const goBack = useGoBack("/signup");
   const { verifyOtp, resendOtp, pendingPhone, user, isLoading, profile } = useAuth();
   const { t } = useLanguage();
 
@@ -132,7 +134,7 @@ export default function VerifyPhone() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => navigate(-1)}
+          onClick={goBack}
           className="h-9 w-9"
         >
           <ArrowLeft className="h-5 w-5" />

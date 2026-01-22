@@ -9,6 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useGoBack } from "@/hooks/use-go-back";
 import { useCreateLostItem, useUploadLostItemImage } from "@/hooks/use-lost-items";
 import { reportItemSchema, type ReportItemFormData, FORM_STEPS } from "@/lib/validations/report-item";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ const STEP_TITLES: Record<string, { titleKey: string; descKey: string }> = {
 
 export default function ReportItem() {
   const navigate = useNavigate();
+  const goBack = useGoBack("/passenger/dashboard");
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const [currentStep, setCurrentStep] = useState(1);
@@ -147,7 +149,7 @@ export default function ReportItem() {
         {/* Header */}
         <div className="p-4 border-b">
           <div className="flex items-center gap-3 mb-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <Button variant="ghost" size="icon" onClick={goBack}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
