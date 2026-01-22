@@ -6,6 +6,7 @@ import {
   Moon,
   Sun,
   MapPin,
+  Globe,
   Shield,
   LogOut,
   ChevronRight,
@@ -16,12 +17,21 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 export default function Settings() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
 
   const [locationServices, setLocationServices] = useState(true);
 
@@ -48,7 +58,7 @@ export default function Settings() {
           <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
             <ArrowLeft className="h-5 w-5" />
           </Button>
-          <h1 className="font-heading text-xl font-bold">Settings</h1>
+          <h1 className="font-heading text-xl font-bold">{t("settings")}</h1>
         </div>
 
         {/* Location Services */}
@@ -60,9 +70,9 @@ export default function Settings() {
                   <MapPin className="h-5 w-5 text-primary" />
                 </div>
                 <div>
-                  <p className="font-medium">Location Services</p>
+                  <p className="font-medium">{t("locationServices")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Enable for better item matching
+                    {t("locationServicesDesc")}
                   </p>
                 </div>
               </div>
@@ -87,13 +97,38 @@ export default function Settings() {
                   )}
                 </div>
                 <div>
-                  <p className="font-medium">Dark Mode</p>
+                  <p className="font-medium">{t("darkMode")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Switch between light and dark theme
+                    {t("darkModeDesc")}
                   </p>
                 </div>
               </div>
               <Switch checked={isDarkMode} onCheckedChange={handleDarkModeChange} />
+            </div>
+
+            <Separator />
+
+            <div className="flex items-center justify-between p-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-muted">
+                  <Globe className="h-5 w-5" />
+                </div>
+                <div>
+                  <p className="font-medium">{t("language")}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {t("languageDesc")}
+                  </p>
+                </div>
+              </div>
+              <Select value={language} onValueChange={(val) => setLanguage(val as "en" | "kn")}>
+                <SelectTrigger className="w-28">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-popover">
+                  <SelectItem value="en">English</SelectItem>
+                  <SelectItem value="kn">ಕನ್ನಡ</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </CardContent>
         </Card>
@@ -110,9 +145,9 @@ export default function Settings() {
                   <Shield className="h-5 w-5" />
                 </div>
                 <div className="text-left">
-                  <p className="font-medium">Privacy Settings</p>
+                  <p className="font-medium">{t("privacySettings")}</p>
                   <p className="text-sm text-muted-foreground">
-                    Manage your data and privacy
+                    {t("privacySettingsDesc")}
                   </p>
                 </div>
               </div>
@@ -130,7 +165,7 @@ export default function Settings() {
               </div>
               <div>
                 <p className="font-medium">AutoConnect</p>
-                <p className="text-sm text-muted-foreground">Version 1.0.0</p>
+                <p className="text-sm text-muted-foreground">{t("appVersion")}</p>
               </div>
             </div>
           </CardContent>
@@ -143,7 +178,7 @@ export default function Settings() {
           onClick={handleLogout}
         >
           <LogOut className="h-4 w-4 mr-2" />
-          Log Out
+          {t("logOut")}
         </Button>
       </div>
     </Layout>
