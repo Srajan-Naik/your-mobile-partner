@@ -158,26 +158,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  // Convert phone to email for Supabase auth (workaround for disabled phone provider)
+  const phoneToEmail = (phone: string): string => {
+    // Remove all non-digit characters and create a deterministic email
+    const digits = phone.replace(/\D/g, "");
+    return `${digits}@phone.autoconnect.local`;
+  };
+
   // Sign up with phone and password
   const signUp = async (phone: string, password: string, userType: UserType): Promise<{ error?: string }> => {
     setIsLoading(true);
     
     // Format phone number (ensure it starts with +)
     const formattedPhone = phone.startsWith("+") ? phone : `+${phone}`;
+    const email = phoneToEmail(formattedPhone);
     
     try {
       const { data, error } = await supabase.auth.signUp({
-        phone: formattedPhone,
+        email,
         password,
         options: {
           data: {
             user_type: userType,
+            phone: formattedPhone,
           },
+          emailRedirectTo: window.location.origin,
         },
       });
 
       if (error) {
         console.error("Signup error:", error);
+        // Translate common errors to user-friendly messages
+        if (error.message.includes("already registered")) {
+          return { error: "This phone number is already registered. Please login instead." };
+        }
         return { error: error.message };
       }
 
@@ -228,15 +242,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(true);
     
     const formattedPhone = phone.startsWith("+") ? phone : `+${phone}`;
+    const email = phoneToEmail(formattedPhone);
     
     try {
       const { error } = await supabase.auth.signInWithPassword({
-        phone: formattedPhone,
+        email,
         password,
       });
 
       if (error) {
         console.error("SignIn error:", error);
+        // Translate common errors to user-friendly messages
+        if (error.message.includes("Invalid login credentials")) {
+          return { error: "Invalid phone number or password" };
+        }
         return { error: error.message };
       }
 
