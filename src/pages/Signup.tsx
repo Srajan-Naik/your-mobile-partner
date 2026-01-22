@@ -60,7 +60,12 @@ export default function Signup() {
     }
 
     toast.success(t("success") + "!");
-    navigate("/verify-phone");
+    // Navigate directly to dashboard based on user type
+    if (data.userType === "driver") {
+      navigate("/driver/verification");
+    } else {
+      navigate("/passenger/dashboard");
+    }
   };
 
   return (
