@@ -37,6 +37,7 @@ import Rewards from "@/pages/Rewards";
 import Settings from "@/pages/Settings";
 import Support from "@/pages/Support";
 import Emergency from "@/pages/Emergency";
+import ReportAbuse from "@/pages/ReportAbuse";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -99,6 +100,7 @@ const App = () => (
                 <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
                 <Route path="/support" element={<ProtectedRoute><Support /></ProtectedRoute>} />
                 <Route path="/emergency" element={<ProtectedRoute><Emergency /></ProtectedRoute>} />
+                <Route path="/report-abuse" element={<ProtectedRoute><ReportAbuse /></ProtectedRoute>} />
 
                 {/* Catch-all */}
                 <Route path="*" element={<NotFound />} />
