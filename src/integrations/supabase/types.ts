@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_name: string
+          event_type: string
+          id: string
+          page_path: string | null
+          properties: Json | null
+          screen_height: number | null
+          screen_width: number | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_name: string
+          event_type: string
+          id?: string
+          page_path?: string | null
+          properties?: Json | null
+          screen_height?: number | null
+          screen_width?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_name?: string
+          event_type?: string
+          id?: string
+          page_path?: string | null
+          properties?: Json | null
+          screen_height?: number | null
+          screen_width?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       conversations: {
         Row: {
           created_at: string
@@ -100,6 +139,42 @@ export type Database = {
           user_id?: string
           vehicle_registration_number?: string | null
           vehicle_registration_storage_path?: string | null
+        }
+        Relationships: []
+      }
+      error_logs: {
+        Row: {
+          component_stack: string | null
+          created_at: string
+          error_message: string
+          error_stack: string | null
+          id: string
+          metadata: Json | null
+          page_path: string | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          component_stack?: string | null
+          created_at?: string
+          error_message: string
+          error_stack?: string | null
+          id?: string
+          metadata?: Json | null
+          page_path?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          component_stack?: string | null
+          created_at?: string
+          error_message?: string
+          error_stack?: string | null
+          id?: string
+          metadata?: Json | null
+          page_path?: string | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -275,6 +350,48 @@ export type Database = {
           title?: string
           type?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      performance_metrics: {
+        Row: {
+          connection_type: string | null
+          created_at: string
+          dom_content_loaded_ms: number | null
+          first_contentful_paint_ms: number | null
+          id: string
+          largest_contentful_paint_ms: number | null
+          load_time_ms: number | null
+          page_path: string
+          time_to_first_byte_ms: number | null
+          user_agent: string | null
+          user_id: string | null
+        }
+        Insert: {
+          connection_type?: string | null
+          created_at?: string
+          dom_content_loaded_ms?: number | null
+          first_contentful_paint_ms?: number | null
+          id?: string
+          largest_contentful_paint_ms?: number | null
+          load_time_ms?: number | null
+          page_path: string
+          time_to_first_byte_ms?: number | null
+          user_agent?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          connection_type?: string | null
+          created_at?: string
+          dom_content_loaded_ms?: number | null
+          first_contentful_paint_ms?: number | null
+          id?: string
+          largest_contentful_paint_ms?: number | null
+          load_time_ms?: number | null
+          page_path?: string
+          time_to_first_byte_ms?: number | null
+          user_agent?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
