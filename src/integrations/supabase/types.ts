@@ -617,42 +617,7 @@ export type Database = {
       }
     }
     Views: {
-      profiles_display: {
-        Row: {
-          avatar_url: string | null
-          bio: string | null
-          created_at: string | null
-          display_name: string | null
-          is_online: boolean | null
-          is_verified: boolean | null
-          last_seen_at: string | null
-          user_id: string | null
-          user_type: Database["public"]["Enums"]["user_type"] | null
-        }
-        Insert: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          is_online?: boolean | null
-          is_verified?: boolean | null
-          last_seen_at?: string | null
-          user_id?: string | null
-          user_type?: Database["public"]["Enums"]["user_type"] | null
-        }
-        Update: {
-          avatar_url?: string | null
-          bio?: string | null
-          created_at?: string | null
-          display_name?: string | null
-          is_online?: boolean | null
-          is_verified?: boolean | null
-          last_seen_at?: string | null
-          user_id?: string | null
-          user_type?: Database["public"]["Enums"]["user_type"] | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Functions: {
       create_notification: {
