@@ -14,6 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import {
   useConversation,
   useMessages,
@@ -28,6 +29,7 @@ import { cn } from "@/lib/utils";
 export default function Chat() {
   const { conversationId } = useParams<{ conversationId: string }>();
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const [message, setMessage] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -70,8 +72,8 @@ export default function Chat() {
   };
 
   const formatMessageDate = (date: Date) => {
-    if (isToday(date)) return "Today";
-    if (isYesterday(date)) return "Yesterday";
+    if (isToday(date)) return t("today");
+    if (isYesterday(date)) return t("yesterday");
     return format(date, "MMMM d, yyyy");
   };
 
@@ -106,9 +108,9 @@ export default function Chat() {
     return (
       <Layout userType={user?.userType || "passenger"} userName={user?.name || ""} onLogout={signOut}>
         <div className="p-4 text-center">
-          <p className="text-muted-foreground">Conversation not found</p>
+          <p className="text-muted-foreground">{t("conversationNotFound")}</p>
           <Button asChild variant="link">
-            <Link to="/conversations">Back to conversations</Link>
+            <Link to="/conversations">{t("backToConversations")}</Link>
           </Button>
         </div>
       </Layout>
@@ -150,11 +152,11 @@ export default function Chat() {
               <MoreVertical className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" className="bg-popover">
             <DropdownMenuItem asChild>
-              <Link to={`/report/${conversation.lost_item_id}`}>View Report</Link>
+              <Link to={`/report/${conversation.lost_item_id}`}>{t("viewReport")}</Link>
             </DropdownMenuItem>
-            <DropdownMenuItem>Report Issue</DropdownMenuItem>
+            <DropdownMenuItem>{t("reportIssue")}</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
@@ -164,7 +166,7 @@ export default function Chat() {
         {/* Lost Item Context Card */}
         <Card className="p-3 bg-muted/50">
           <p className="text-sm text-muted-foreground">
-            Conversation about:{" "}
+            {t("conversationAbout")}{" "}
             <Link to={`/report/${conversation.lost_item_id}`} className="text-primary hover:underline">
               {conversation.lost_item?.title}
             </Link>
@@ -177,8 +179,8 @@ export default function Chat() {
           </div>
         ) : messages?.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            <p>No messages yet</p>
-            <p className="text-sm">Start the conversation!</p>
+            <p>{t("noMessagesYet")}</p>
+            <p className="text-sm">{t("startConversation")}</p>
           </div>
         ) : (
           messageGroups.map((group) => (
@@ -213,13 +215,13 @@ export default function Chat() {
                         {msg.message_type === "location" && (
                           <div className="flex items-center gap-2">
                             <MapPin className="h-4 w-4" />
-                            <span className="text-sm">Shared location</span>
+                            <span className="text-sm">{t("sharedLocation")}</span>
                           </div>
                         )}
                         {msg.message_type === "image" && (
                           <div className="flex items-center gap-2">
                             <Image className="h-4 w-4" />
-                            <span className="text-sm">Shared image</span>
+                            <span className="text-sm">{t("sharedImage")}</span>
                           </div>
                         )}
                         <p
@@ -251,7 +253,7 @@ export default function Chat() {
             <MapPin className="h-5 w-5" />
           </Button>
           <Input
-            placeholder="Type a message..."
+            placeholder={t("typeMessage")}
             value={message}
             onChange={(e) => setMessage(e.target.value)}
             onKeyPress={handleKeyPress}

@@ -6,12 +6,14 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useConversations } from "@/hooks/use-conversations";
 import { useRealtimeConversations, useRealtimeNotifications } from "@/hooks/use-realtime";
 import { formatDistanceToNow } from "date-fns";
 
 export default function Conversations() {
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const { data: conversations, isLoading } = useConversations();
 
   // Enable real-time updates
@@ -28,7 +30,7 @@ export default function Conversations() {
       onLogout={signOut}
     >
       <div className="p-4 space-y-6">
-        <h1 className="font-heading text-2xl font-bold">Messages</h1>
+        <h1 className="font-heading text-2xl font-bold">{t("messages")}</h1>
 
         {isLoading ? (
           <div className="space-y-3">
@@ -39,11 +41,11 @@ export default function Conversations() {
         ) : conversations?.length === 0 ? (
           <div className="text-center py-12">
             <MessageCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="font-medium mb-1">No conversations yet</h3>
+            <h3 className="font-medium mb-1">{t("noConversationsYet")}</h3>
             <p className="text-sm text-muted-foreground">
               {user?.userType === "driver"
-                ? "Respond to a lost item report to start a conversation"
-                : "When a driver responds to your report, you'll see it here"}
+                ? t("driverRespondPrompt")
+                : t("passengerWaitPrompt")}
             </p>
           </div>
         ) : (
@@ -52,7 +54,7 @@ export default function Conversations() {
             {activeConversations.length > 0 && (
               <div>
                 <h2 className="font-medium text-sm text-muted-foreground mb-3">
-                  Active ({activeConversations.length})
+                  {t("activeConversations")} ({activeConversations.length})
                 </h2>
                 <div className="space-y-2">
                   {activeConversations.map((conv) => (
@@ -66,7 +68,7 @@ export default function Conversations() {
             {resolvedConversations.length > 0 && (
               <div>
                 <h2 className="font-medium text-sm text-muted-foreground mb-3">
-                  Resolved ({resolvedConversations.length})
+                  {t("resolvedConversations")} ({resolvedConversations.length})
                 </h2>
                 <div className="space-y-2">
                   {resolvedConversations.map((conv) => (
@@ -95,14 +97,15 @@ interface ConversationCardProps {
 }
 
 function ConversationCard({ conversation }: ConversationCardProps) {
+  const { t } = useLanguage();
   const userName = conversation.other_user_profile?.display_name || "User";
   const lastMessage = conversation.last_message;
   const unreadCount = conversation.unread_count || 0;
 
   const getLastMessagePreview = () => {
-    if (!lastMessage) return "No messages yet";
-    if (lastMessage.message_type === "image") return "📷 Photo";
-    if (lastMessage.message_type === "location") return "📍 Location";
+    if (!lastMessage) return t("noMessagesPreview");
+    if (lastMessage.message_type === "image") return t("photoPreview");
+    if (lastMessage.message_type === "location") return t("locationPreview");
     return lastMessage.content || "";
   };
 

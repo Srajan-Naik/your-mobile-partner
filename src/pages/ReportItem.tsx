@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useAuth } from "@/contexts/AuthContext";
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useCreateLostItem, useUploadLostItemImage } from "@/hooks/use-lost-items";
 import { reportItemSchema, type ReportItemFormData, FORM_STEPS } from "@/lib/validations/report-item";
 import { cn } from "@/lib/utils";
@@ -18,9 +19,17 @@ import { LocationTimeStep } from "@/components/report-item/LocationTimeStep";
 import { AutoDetailsStep } from "@/components/report-item/AutoDetailsStep";
 import { PhotosStep } from "@/components/report-item/PhotosStep";
 
+const STEP_TITLES: Record<string, { titleKey: string; descKey: string }> = {
+  "1": { titleKey: "itemDetails", descKey: "itemDetailsDesc" },
+  "2": { titleKey: "locationTime", descKey: "locationTimeDesc" },
+  "3": { titleKey: "autoDetails", descKey: "autoDetailsDesc" },
+  "4": { titleKey: "photos", descKey: "photosDesc" },
+};
+
 export default function ReportItem() {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
+  const { t } = useLanguage();
   const [currentStep, setCurrentStep] = useState(1);
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
 
@@ -74,7 +83,7 @@ export default function ReportItem() {
   const handleSaveDraft = async () => {
     const data = form.getValues();
     if (!data.category || !data.title || !data.lost_date) {
-      form.setError("root", { message: "Please fill in at least item category, title, and date" });
+      form.setError("root", { message: t("fillRequiredFields") });
       return;
     }
 
@@ -130,6 +139,7 @@ export default function ReportItem() {
   };
 
   const isSubmitting = createLostItem.isPending || uploadImage.isPending;
+  const stepConfig = STEP_TITLES[String(currentStep)];
 
   return (
     <Layout userType="passenger" userName={user?.name || "Passenger"} onLogout={signOut}>
@@ -141,9 +151,9 @@ export default function ReportItem() {
               <ArrowLeft className="h-5 w-5" />
             </Button>
             <div>
-              <h1 className="font-heading text-lg font-semibold">Report Lost Item</h1>
+              <h1 className="font-heading text-lg font-semibold">{t("reportItemTitle")}</h1>
               <p className="text-sm text-muted-foreground">
-                Step {currentStep} of {FORM_STEPS.length}
+                {t("step")} {currentStep} {t("of")} {FORM_STEPS.length}
               </p>
             </div>
           </div>
@@ -152,9 +162,9 @@ export default function ReportItem() {
 
         {/* Step Indicator */}
         <div className="px-4 py-3 bg-muted/50">
-          <p className="font-medium">{FORM_STEPS[currentStep - 1].title}</p>
+          <p className="font-medium">{t(stepConfig.titleKey)}</p>
           <p className="text-sm text-muted-foreground">
-            {FORM_STEPS[currentStep - 1].description}
+            {t(stepConfig.descKey)}
           </p>
         </div>
 
@@ -191,7 +201,7 @@ export default function ReportItem() {
             {currentStep > 1 && (
               <Button variant="outline" onClick={handleBack} disabled={isSubmitting}>
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back
+                {t("back")}
               </Button>
             )}
 
@@ -203,12 +213,12 @@ export default function ReportItem() {
               disabled={isSubmitting}
             >
               <Save className="h-4 w-4 mr-2" />
-              Save Draft
+              {t("saveDraft")}
             </Button>
 
             {currentStep < FORM_STEPS.length ? (
               <Button onClick={handleNext} disabled={isSubmitting}>
-                Next
+                {t("next")}
                 <ArrowRight className="h-4 w-4 ml-2" />
               </Button>
             ) : (
@@ -218,7 +228,7 @@ export default function ReportItem() {
                 ) : (
                   <>
                     <Check className="h-4 w-4 mr-2" />
-                    Submit Report
+                    {t("submitReport")}
                   </>
                 )}
               </Button>
