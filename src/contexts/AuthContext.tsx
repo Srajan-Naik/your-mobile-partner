@@ -160,9 +160,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Convert phone to email for Supabase auth (workaround for disabled phone provider)
   const phoneToEmail = (phone: string): string => {
-    // Remove all non-digit characters and create a deterministic email
+    // Remove all non-digit characters and create a deterministic email.
+    // NOTE: GoTrue validates email format strictly; use a real-looking domain.
     const digits = phone.replace(/\D/g, "");
-    return `${digits}@phone.autoconnect.local`;
+    return `${digits}@phone.autoconnect.app`;
   };
 
   // Sign up with phone and password
