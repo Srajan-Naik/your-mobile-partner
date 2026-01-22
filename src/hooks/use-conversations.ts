@@ -272,12 +272,10 @@ export function useMarkMessagesRead() {
     mutationFn: async (conversationId: string) => {
       if (!user?.id) throw new Error("Not authenticated");
 
-      const { error } = await supabase
-        .from("messages")
-        .update({ is_read: true })
-        .eq("conversation_id", conversationId)
-        .neq("sender_id", user.id)
-        .eq("is_read", false);
+      // Use secure SECURITY DEFINER function to ensure only recipients can mark as read
+      const { error } = await supabase.rpc("mark_messages_read", {
+        _conversation_id: conversationId,
+      });
 
       if (error) throw error;
     },
