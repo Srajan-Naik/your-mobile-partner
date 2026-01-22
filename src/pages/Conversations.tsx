@@ -7,11 +7,16 @@ import { Badge } from "@/components/ui/badge";
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { useAuth } from "@/contexts/AuthContext";
 import { useConversations } from "@/hooks/use-conversations";
+import { useRealtimeConversations, useRealtimeNotifications } from "@/hooks/use-realtime";
 import { formatDistanceToNow } from "date-fns";
 
 export default function Conversations() {
   const { user, signOut } = useAuth();
   const { data: conversations, isLoading } = useConversations();
+
+  // Enable real-time updates
+  useRealtimeConversations();
+  useRealtimeNotifications();
 
   const activeConversations = conversations?.filter((c) => c.status === "active") || [];
   const resolvedConversations = conversations?.filter((c) => c.status !== "active") || [];

@@ -287,7 +287,9 @@ export type Database = {
           email: string | null
           emergency_contact: string | null
           id: string
+          is_online: boolean
           is_verified: boolean
+          last_seen_at: string | null
           phone: string | null
           updated_at: string
           user_id: string
@@ -301,7 +303,9 @@ export type Database = {
           email?: string | null
           emergency_contact?: string | null
           id?: string
+          is_online?: boolean
           is_verified?: boolean
+          last_seen_at?: string | null
           phone?: string | null
           updated_at?: string
           user_id: string
@@ -315,7 +319,9 @@ export type Database = {
           email?: string | null
           emergency_contact?: string | null
           id?: string
+          is_online?: boolean
           is_verified?: boolean
+          last_seen_at?: string | null
           phone?: string | null
           updated_at?: string
           user_id?: string
@@ -431,6 +437,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_notification: {
+        Args: {
+          _action_url?: string
+          _body: string
+          _data?: Json
+          _title: string
+          _type?: string
+          _user_id: string
+        }
+        Returns: string
+      }
       get_user_type: {
         Args: { _user_id: string }
         Returns: Database["public"]["Enums"]["user_type"]
